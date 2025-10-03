@@ -12,6 +12,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.MapsId;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 
 @Entity
@@ -105,6 +107,16 @@ public class Recipe {
 public void removeItem(RecipeItem item) {
     items.remove(item);
     item.setRecipe(null);
+}
+
+@PrePersist
+protected void onCreate() {
+    this.lastUpdateDate = LocalDateTime.now(); 
+}
+
+@PreUpdate
+protected void onUpdate() {
+    this.lastUpdateDate = LocalDateTime.now();
 }
 
 }

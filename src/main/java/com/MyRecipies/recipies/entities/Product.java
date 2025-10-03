@@ -9,6 +9,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 
 @Entity
@@ -98,5 +100,15 @@ public class Product {
         this.recipe = recipe;
     }
 
+    @PrePersist
+protected void onCreate() {
+    this.createDate = LocalDate.now();
+    this.lastUpdateDate = LocalDateTime.now(); 
+}
+
+@PreUpdate
+protected void onUpdate() {
+    this.lastUpdateDate = LocalDateTime.now();
+}
     
 }

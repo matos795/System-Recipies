@@ -14,7 +14,27 @@ amount INT,
 CONSTRAINT fk_recipe_product FOREIGN KEY (id) REFERENCES products(id)
 );
 
+CREATE TABLE suppliers (
+id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+name VARCHAR(100) NOT NULL,
+phone VARCHAR(100),
+email VARCHAR(100),
+address VARCHAR(100)
+);
 
+CREATE TABLE ingredients (
+    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    brand VARCHAR(50),
+    price_cost NUMERIC(10,2) NOT NULL,
+    img_url VARCHAR(255),
+    create_date DATE NOT NULL,
+    last_update_date TIMESTAMP,
+    quantity_per_unit NUMERIC(10,2) NOT NULL,
+    unit VARCHAR(20) NOT NULL,
+    supplier_id INT,
+    CONSTRAINT fk_ingredient_supplier FOREIGN KEY (supplier_id) REFERENCES suppliers(id)
+);
 
 CREATE TABLE recipe_items (
     id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
