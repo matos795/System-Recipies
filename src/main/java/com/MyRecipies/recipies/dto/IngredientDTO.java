@@ -46,7 +46,11 @@ public class IngredientDTO {
         lastUpdateDate = entity.getLastUpdateDate();
         quantityPerUnit = entity.getQuantityPerUnit();
         unit = entity.getUnit();
-        supplierId = entity.getSupplier().getId();
+        if (entity.getSupplier() != null) {
+            supplierId = entity.getSupplier().getId();
+        } else {
+            supplierId = null;
+        }
     }
 
     public Long getId() {
