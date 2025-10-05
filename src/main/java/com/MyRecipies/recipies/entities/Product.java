@@ -100,6 +100,13 @@ public class Product {
         this.recipe = recipe;
     }
 
+    public Double calculateUnitCost() {
+    if (price != null && recipe.getAmount() != null && recipe.getAmount() > 0) {
+        return price / recipe.getAmount();
+    }
+    return null;
+}
+
     @PrePersist
 protected void onCreate() {
     this.createDate = LocalDate.now();
