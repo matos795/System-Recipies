@@ -9,13 +9,13 @@ import com.MyRecipies.recipies.entities.Recipe;
 
 public class RecipeDTO {
 
+    // Dados da receita
+    private Long id;
     // Dados do produto
     private String productName;
     private Double productPrice;
     private String imgUrl;
 
-    // Dados da receita
-    private Long id;
     private String description;
     private Integer amount;
     private LocalDate createDate;

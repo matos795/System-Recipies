@@ -1,14 +1,14 @@
 package com.MyRecipies.recipies.services;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
+
 import org.springframework.transaction.annotation.Transactional;
 
 import com.MyRecipies.recipies.dto.RecipeDTO;
@@ -69,34 +69,67 @@ public class RecipeService {
     }
     }
 
-    @Transactional(propagation = Propagation.SUPPORTS)
+@Transactional
 public void delete(Long id) {
-	if (!recipeRepository.existsById(id)) {
-		throw new ResourceNotFoundException("Recurso não encontrado");
-	}
-	try {
-        	recipeRepository.deleteById(id);    		
-	}
-    	catch (DataIntegrityViolationException e) {
-        	throw new DatabaseException("Falha de integridade referencial");
-   	}
+    // Busca a receita
+    Recipe recipe = recipeRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Recurso não encontrado"));
+
+    try {
+        // Limpa os items para acionar orphanRemoval
+        recipe.getItems().clear();
+
+        // Pega o produto associado
+        Product product = recipe.getProduct();
+
+        // Deleta a receita
+        recipeRepository.delete(recipe);
+
+        // Deleta o produto
+        if (product != null) {
+            productRepository.delete(product);
+        }
+
+    } catch (DataIntegrityViolationException e) {
+        throw new DatabaseException("Falha de integridade referencial");
+    }
 }
 
+
     private void dtoToEntity(Recipe entity, RecipeDTO dto){
-        Product product = new Product();
+
+        Product product;
+if (entity.getProduct() != null && entity.getProduct().getId() != null) {
+    Long existingProductId = entity.getProduct().getId();
+    product = productRepository.getReferenceById(existingProductId);
     product.setName(dto.getProductName());
     product.setPrice(dto.getProductPrice());
     product.setImgUrl(dto.getImgUrl());
-    product.setCreateDate(dto.getCreateDate());
+    product.setCreateDate(dto.getCreateDate() != null ? dto.getCreateDate() : LocalDate.now());
     product.setLastUpdateDate(dto.getLastUpdateDate());
+} else {
+    product = new Product();
+    product.setName(dto.getProductName());
+    product.setPrice(dto.getProductPrice());
+    product.setImgUrl(dto.getImgUrl());
+    product.setCreateDate(dto.getCreateDate() != null ? dto.getCreateDate() : LocalDate.now());
+    product.setLastUpdateDate(dto.getLastUpdateDate());
+    product = productRepository.save(product);
+}
 
-    entity.setProduct(product);
-    product.setRecipe(entity);
+        entity.setProduct(product);
+        product.setRecipe(entity);
         
         entity.setDescription(dto.getDescription());
         entity.setAmount(dto.getAmount());
 
-        List<RecipeItem> items = new ArrayList<>();
+    if (entity.getItems() == null) {
+    entity.setItems(new ArrayList<>());
+} else {
+    entity.getItems().clear();
+}
+
+
         for (RecipeItemDTO itemDTO : dto.getItems()) {
             RecipeItem item = new RecipeItem();
             item.setRecipe(entity);
@@ -114,9 +147,7 @@ public void delete(Long id) {
                 item.setUnitCost(sub.calculateUnitCost());
                 item.setSubProduct(sub);
             }
-            items.add(item);
+            entity.addItem(item);
         }
-
-        entity.setItems(items);
     }
 }
