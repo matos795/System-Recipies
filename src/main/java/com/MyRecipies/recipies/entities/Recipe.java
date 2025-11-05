@@ -8,6 +8,7 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MapsId;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
@@ -31,17 +32,22 @@ public class Recipe {
     private String description;
     private Integer amount;
 
+    @ManyToOne
+    @JoinColumn(name = "client_id")
+    private User client;
+
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RecipeItem> items = new ArrayList<>();
 
     public Recipe() {
     }
 
-    public Recipe(Product product, LocalDateTime lastUpdateDate, String description, Integer amount) {
+    public Recipe(Product product, LocalDateTime lastUpdateDate, String description, Integer amount, User client) {
         this.product = product;
         this.lastUpdateDate = lastUpdateDate;
         this.description = description;
         this.amount = amount;
+        this.client = client;
     }
     
     public Long getId() {
@@ -97,6 +103,13 @@ public class Recipe {
     }
     }
 
+    public User getClient() {
+        return client;
+    }
+
+    public void setClient(User client) {
+        this.client = client;
+    }
 
     public void addItem(RecipeItem item) {
     items.add(item);

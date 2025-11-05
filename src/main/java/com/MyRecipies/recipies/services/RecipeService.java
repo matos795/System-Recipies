@@ -20,6 +20,7 @@ import com.MyRecipies.recipies.entities.RecipeItem;
 import com.MyRecipies.recipies.repositories.IngredientRepository;
 import com.MyRecipies.recipies.repositories.ProductRepository;
 import com.MyRecipies.recipies.repositories.RecipeRepository;
+import com.MyRecipies.recipies.repositories.UserRepository;
 import com.MyRecipies.recipies.services.exceptions.DatabaseException;
 import com.MyRecipies.recipies.services.exceptions.ResourceNotFoundException;
 
@@ -36,6 +37,9 @@ public class RecipeService {
 
     @Autowired
     private ProductRepository productRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Transactional(readOnly = true)
     public Page<RecipeDTO> findAll(Pageable pageable){
@@ -122,6 +126,7 @@ if (entity.getProduct() != null && entity.getProduct().getId() != null) {
         
         entity.setDescription(dto.getDescription());
         entity.setAmount(dto.getAmount());
+        entity.setClient(userRepository.getReferenceById(dto.getClient().getId()));
 
     if (entity.getItems() == null) {
     entity.setItems(new ArrayList<>());

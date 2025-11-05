@@ -29,6 +29,8 @@ public class RecipeDTO {
     // Itens da receita
     private List<RecipeItemDTO> items;
 
+    private ClientDTO client;
+
     public RecipeDTO() {
 
     }
@@ -56,6 +58,7 @@ public class RecipeDTO {
         createDate = entity.getProduct().getCreateDate();
         lastUpdateDate = entity.getLastUpdateDate();
         items = entity.getItems().stream().map(x -> new RecipeItemDTO(x)).collect(Collectors.toList());
+        client = new ClientDTO(entity.getClient());
     }
 
     public String getProductName() {
@@ -130,5 +133,12 @@ public class RecipeDTO {
         this.items = items;
     }
 
+    public ClientDTO getClient() {
+        return client;
+    }
+
+    public void setClient(ClientDTO client) {
+        this.client = client;
+    }
     
 }

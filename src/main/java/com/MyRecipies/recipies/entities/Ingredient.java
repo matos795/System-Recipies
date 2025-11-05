@@ -50,11 +50,15 @@ public class Ingredient {
     @JoinColumn(name = "supplier_id")
     private Supplier supplier;
 
+    @ManyToOne
+    @JoinColumn(name = "client_id")
+    private User client;
+
     public Ingredient() {
     }
 
     public Ingredient(Long id, String name, String brand, Double priceCost, String imgUrl, LocalDate createDate,
-            LocalDateTime lastUpdateDate, Double quantityPerUnit, UnitType unit, Supplier supplier) {
+            LocalDateTime lastUpdateDate, Double quantityPerUnit, UnitType unit, Supplier supplier, User client) {
         this.id = id;
         this.name = name;
         this.brand = brand;
@@ -65,6 +69,7 @@ public class Ingredient {
         this.quantityPerUnit = quantityPerUnit;
         this.unit = unit;
         this.supplier = supplier;
+        this.client = client;
     }
 
     public Long getId() {
@@ -167,6 +172,14 @@ protected void onCreate() {
 @PreUpdate
 protected void onUpdate() {
     this.lastUpdateDate = LocalDateTime.now();
+}
+
+public User getClient() {
+    return client;
+}
+
+public void setClient(User client) {
+    this.client = client;
 }
 
 }

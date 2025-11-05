@@ -1,11 +1,64 @@
 -- ==========================================================
--- 🧹 LIMPEZA (remover tabelas antigas se existirem)
+-- 🧹 LIMPEZA (remover tabelas antigas)
+-- ATENÇÃO: ordem invertida para evitar conflitos
 -- ==========================================================
 DROP TABLE IF EXISTS recipe_items CASCADE;
 DROP TABLE IF EXISTS recipes CASCADE;
 DROP TABLE IF EXISTS ingredients CASCADE;
 DROP TABLE IF EXISTS suppliers CASCADE;
 DROP TABLE IF EXISTS products CASCADE;
+DROP TABLE IF EXISTS tb_user_role CASCADE;
+DROP TABLE IF EXISTS tb_user CASCADE;
+DROP TABLE IF EXISTS tb_role CASCADE;
+
+-- ==========================================================
+-- 👤 TABELA tb_role
+-- ==========================================================
+CREATE TABLE tb_role (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    authority VARCHAR(255) NOT NULL
+);
+
+-- ==========================================================
+-- 👤 TABELA tb_user
+-- ==========================================================
+CREATE TABLE tb_user (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    phone VARCHAR(50),
+    birth_date DATE,
+    password VARCHAR(255) NOT NULL
+);
+
+-- ==========================================================
+-- 🔗 TABELA tb_user_role (Many-To-Many)
+-- ==========================================================
+CREATE TABLE tb_user_role (
+    user_id BIGINT NOT NULL,
+    role_id BIGINT NOT NULL,
+
+    PRIMARY KEY (user_id, role_id),
+
+    CONSTRAINT fk_userrole_user
+        FOREIGN KEY (user_id) REFERENCES tb_user(id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_userrole_role
+        FOREIGN KEY (role_id) REFERENCES tb_role(id)
+        ON DELETE CASCADE
+);
+
+-- ==========================================================
+-- 🏭 TABELA SUPPLIERS
+-- ==========================================================
+CREATE TABLE suppliers (
+    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    phone VARCHAR(100),
+    email VARCHAR(100),
+    address VARCHAR(100)
+);
 
 -- ==========================================================
 -- 🧱 TABELA PRODUCTS
@@ -21,28 +74,22 @@ CREATE TABLE products (
 
 -- ==========================================================
 -- 📘 TABELA RECIPES (usa @MapsId -> product_id é PK e FK)
+-- agora com client_id
 -- ==========================================================
 CREATE TABLE recipes (
     product_id INT PRIMARY KEY,
     last_update_date TIMESTAMP,
     description VARCHAR(255),
     amount INT,
-    CONSTRAINT fk_recipe_product FOREIGN KEY (product_id) REFERENCES products(id)
-);
-
--- ==========================================================
--- 🏭 TABELA SUPPLIERS
--- ==========================================================
-CREATE TABLE suppliers (
-    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    phone VARCHAR(100),
-    email VARCHAR(100),
-    address VARCHAR(100)
+    client_id BIGINT,
+    
+    CONSTRAINT fk_recipe_product FOREIGN KEY (product_id) REFERENCES products(id),
+    CONSTRAINT fk_recipe_user FOREIGN KEY (client_id) REFERENCES tb_user(id)
 );
 
 -- ==========================================================
 -- 🧂 TABELA INGREDIENTS
+-- adicionada FK client_id
 -- ==========================================================
 CREATE TABLE ingredients (
     id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -55,7 +102,10 @@ CREATE TABLE ingredients (
     quantity_per_unit NUMERIC(10,2) NOT NULL,
     unit VARCHAR(20) NOT NULL,
     supplier_id INT,
-    CONSTRAINT fk_ingredient_supplier FOREIGN KEY (supplier_id) REFERENCES suppliers(id)
+    client_id BIGINT,
+
+    CONSTRAINT fk_ingredient_supplier FOREIGN KEY (supplier_id) REFERENCES suppliers(id),
+    CONSTRAINT fk_ingredient_user FOREIGN KEY (client_id) REFERENCES tb_user(id)
 );
 
 -- ==========================================================
