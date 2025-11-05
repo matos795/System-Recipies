@@ -1,13 +1,16 @@
 package com.MyRecipies.recipies.dto;
 
 import com.MyRecipies.recipies.entities.RecipeItem;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 
 public class RecipeItemDTO {
 
     private Long id;
-    private Long recipeId;
     private Long subProductId;
     private Long ingredientId;
+    @NotNull
+    @Positive
     private Double quantity;
 
     public RecipeItemDTO() {
@@ -15,7 +18,6 @@ public class RecipeItemDTO {
 
     public RecipeItemDTO(RecipeItem item) {
         this.id = item.getId();
-        this.recipeId = item.getRecipe() != null ? item.getRecipe().getId() : null;
         this.subProductId = item.getSubProduct() != null ? item.getSubProduct().getId() : null;
         this.ingredientId = item.getIngredient() != null ? item.getIngredient().getId() : null;
         this.quantity = item.getQuantity();
@@ -27,14 +29,6 @@ public class RecipeItemDTO {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public Long getRecipeId() {
-        return recipeId;
-    }
-
-    public void setRecipeId(Long recipeId) {
-        this.recipeId = recipeId;
     }
 
     public Long getSubProductId() {

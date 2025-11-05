@@ -6,13 +6,18 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.MyRecipies.recipies.entities.Recipe;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 public class RecipeDTO {
 
     // Dados da receita
     private Long id;
     // Dados do produto
+    @NotBlank
     private String productName;
+
+    @NotNull
     private Double productPrice;
     private String imgUrl;
 

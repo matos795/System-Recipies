@@ -1,10 +1,12 @@
 package com.MyRecipies.recipies.dto;
 
 import com.MyRecipies.recipies.entities.Supplier;
+import jakarta.validation.constraints.NotBlank;
 
 public class SupplierDTO {
 
     private Long id;
+    @NotBlank
     private String name;
     private String phone;
     private String email;

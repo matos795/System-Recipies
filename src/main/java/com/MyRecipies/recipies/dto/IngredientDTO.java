@@ -5,17 +5,27 @@ import java.time.LocalDateTime;
 
 import com.MyRecipies.recipies.entities.Ingredient;
 import com.MyRecipies.recipies.entities.enums.UnitType;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 public class IngredientDTO {
 
     private Long id;
+    @NotBlank
     private String name;
     private String brand;
+
+    @NotNull
     private Double priceCost;
+
     private String imgUrl;
     private LocalDate createDate;
     private LocalDateTime lastUpdateDate;
+
+    @NotNull
     private Double quantityPerUnit;
+
+    @NotNull
     private UnitType unit;
     private Long supplierId;
     

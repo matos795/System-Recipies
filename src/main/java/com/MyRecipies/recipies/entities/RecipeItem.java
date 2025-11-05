@@ -28,13 +28,13 @@ public class RecipeItem {
     @ManyToOne
     @JoinColumn(name = "ingredient_id")
     private Ingredient ingredient;
-
+    @Column(nullable = false)
     private Double quantity;
     
-    @Column(name = "unit_cost")
+    @Column(name = "unit_cost", nullable = false)
     private Double unitCost;
 
-    @Column(name = "total_cost")
+    @Column(name = "total_cost", nullable = false)
     private Double totalCost;
     
     public RecipeItem() {

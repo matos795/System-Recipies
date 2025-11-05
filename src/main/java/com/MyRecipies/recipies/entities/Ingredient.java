@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 
 import com.MyRecipies.recipies.entities.enums.UnitType;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -24,16 +25,25 @@ public class Ingredient {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String name;
+
     private String brand;
+
+    @Column(name = "price_cost", nullable = false)
     private Double priceCost;
+
     private String imgUrl;
+
+    @Column(name = "create_date", nullable = false)
     private LocalDate createDate;
+
     private LocalDateTime lastUpdateDate;
+
+    @Column(name = "quantity_per_unit", nullable = false)
     private Double quantityPerUnit;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private UnitType unit;
 
     @ManyToOne
