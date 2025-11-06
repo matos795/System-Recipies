@@ -73,13 +73,13 @@ public class IngredientService {
 
     @Transactional(propagation = Propagation.SUPPORTS)
 public void delete(Long id) {
-	if (!repository.existsById(id)) {
-		throw new ResourceNotFoundException("Recurso não encontrado");
-	}
+
+    Ingredient ingredient = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Recurso não encontrado"));
+    authService.validateSelfOrAdmin(ingredient.getClient().getId());
+
 	try {
-            authService.validateSelfOrAdmin(repository.getReferenceById(id).getClient().getId());
-        	repository.deleteById(id);    		
-	}
+            repository.deleteById(id);    		
+	    }
     	catch (DataIntegrityViolationException e) {
         	throw new DatabaseException("Falha de integridade referencial");
    	}
@@ -95,6 +95,7 @@ public void delete(Long id) {
         
         if (dto.getSupplierId() != null) {
         Supplier supplier = supplierRepository.findById(dto.getSupplierId()).orElseThrow(() -> new ResourceNotFoundException("Recurso não encontrado!"));
+        authService.validateSelfOrAdmin(supplier.getClient().getId());
         entity.setSupplier(supplier);
         } else entity.setSupplier(null);
     }

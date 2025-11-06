@@ -1,6 +1,7 @@
 package com.MyRecipies.recipies.services;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -47,6 +48,13 @@ public class UserService implements UserDetailsService{
         }
 
         return user;
+    }
+
+    @Transactional(readOnly = true)
+    public List<UserDTO> findAll(){
+        List<User> users = repository.findAll();
+        List<UserDTO> userDTOs = users.stream().map(x -> new UserDTO(x)).collect(Collectors.toList());
+        return userDTOs;
     }
 
     public UserDTO insert(UserInsertDTO dto) {

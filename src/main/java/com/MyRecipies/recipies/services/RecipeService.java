@@ -108,13 +108,10 @@ public void delete(Long id) {
 // Método dtoToEntity completo
 private void dtoToEntity(Recipe entity, RecipeDTO dto){
 
-    // Produto associado
     Product product;
     if (entity.getProduct() != null && entity.getProduct().getId() != null) {
-        // Atualiza o produto existente
         product = productRepository.getReferenceById(entity.getProduct().getId());
     } else {
-        // Cria novo produto
         product = new Product();
     }
 
@@ -129,35 +126,32 @@ private void dtoToEntity(Recipe entity, RecipeDTO dto){
     entity.setProduct(product);
     product.setRecipe(entity);
 
-    // Campos da receita
     entity.setDescription(dto.getDescription());
     entity.setAmount(dto.getAmount());
 
-    // Limpa itens antigos ou cria lista nova
     if (entity.getItems() == null) {
         entity.setItems(new ArrayList<>());
     } else {
         entity.getItems().clear();
     }
 
-    // Adiciona itens da receita
     for (RecipeItemDTO itemDTO : dto.getItems()) {
         RecipeItem item = new RecipeItem();
         item.setRecipe(entity);
         item.setQuantity(itemDTO.getQuantity());
 
         if (itemDTO.getIngredientId() != null) {
-            Ingredient ing = ingredientRepository.findById(itemDTO.getIngredientId())
-                .orElseThrow(() -> new ResourceNotFoundException("Ingrediente não encontrado!"));
-            item.setIngredient(ing);
-            item.setUnitCost(ing.calculateUnitCost());
+            Ingredient ing = ingredientRepository.findById(itemDTO.getIngredientId()).orElseThrow(() -> new ResourceNotFoundException("Ingrediente não encontrado!"));
+                authService.validateSelfOrAdmin(ing.getClient().getId());
+                    item.setIngredient(ing);
+                    item.setUnitCost(ing.calculateUnitCost());
         } else if(itemDTO.getSubProductId() != null) {
-            Product sub = productRepository.findById(itemDTO.getSubProductId())
-                .orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado!"));
-            item.setSubProduct(sub);
-            item.setUnitCost(sub.calculateUnitCost());
+            Product sub = productRepository.findById(itemDTO.getSubProductId()).orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado!"));
+                authService.validateSelfOrAdmin(sub.getRecipe().getClient().getId());
+                    item.setSubProduct(sub);
+                    item.setUnitCost(sub.calculateUnitCost());
         }
-
+        
         entity.addItem(item);
     }
 }
