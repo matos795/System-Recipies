@@ -34,11 +34,17 @@ public class IngredientService {
     private UserService userService;
 
     @Transactional(readOnly = true)
-    public Page<IngredientDTO> findAll(Pageable pageable){
+    public Page<IngredientDTO> findByClientId(Pageable pageable){
 
         Long userId = userService.authenticated().getId();
 
         Page<Ingredient> ingredients = repository.findByClientId(userId, pageable);
+        return ingredients.map(x -> new IngredientDTO(x));
+    }
+
+    @Transactional(readOnly = true)
+    public Page<IngredientDTO> findAll(Pageable pageable){
+        Page<Ingredient> ingredients = repository.findAll(pageable);
         return ingredients.map(x -> new IngredientDTO(x));
     }
 

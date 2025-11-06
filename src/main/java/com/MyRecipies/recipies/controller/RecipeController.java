@@ -34,6 +34,13 @@ public class RecipeController {
         return ResponseEntity.ok(page);
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+    @GetMapping(value = "/all")
+    public ResponseEntity<Page<RecipeDTO>> findAll(Pageable pageable){
+        Page<RecipeDTO> page = service.findAll(pageable);
+        return ResponseEntity.ok(page);
+    }
+
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CLIENT')")
     @GetMapping(value = "/{id}")
     public ResponseEntity<RecipeDTO> findById(@PathVariable Long id){

@@ -30,6 +30,13 @@ public class IngredientController {
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CLIENT')")
     @GetMapping
+    public ResponseEntity<Page<IngredientDTO>> findByClientId(Pageable pageable){
+        Page<IngredientDTO> page = service.findByClientId(pageable);
+        return ResponseEntity.ok(page);
+    }
+
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+    @GetMapping(value = "/all")
     public ResponseEntity<Page<IngredientDTO>> findAll(Pageable pageable){
         Page<IngredientDTO> page = service.findAll(pageable);
         return ResponseEntity.ok(page);

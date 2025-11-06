@@ -33,6 +33,13 @@ public class SupplierController {
         return ResponseEntity.ok(list);
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+    @GetMapping(value = "/all")
+    public ResponseEntity<List<SupplierDTO>> findAll(){
+        List<SupplierDTO> list = service.findAll();
+        return ResponseEntity.ok(list);
+    }
+
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CLIENT')")
     @GetMapping(value = "/{id}")
     public ResponseEntity<SupplierDTO> findById(@PathVariable Long id){

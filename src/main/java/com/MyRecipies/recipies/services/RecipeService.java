@@ -51,6 +51,12 @@ public class RecipeService {
     }
 
     @Transactional(readOnly = true)
+    public Page<RecipeDTO> findAll(Pageable pageable){
+        Page<Recipe> recipes = recipeRepository.findAll(pageable);
+        return recipes.map(x -> new RecipeDTO(x));
+    }
+
+    @Transactional(readOnly = true)
     public RecipeDTO findById(Long id){
         Recipe recipe = recipeRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Recurso não encontrado!"));
         authService.validateSelfOrAdmin(recipe.getClient().getId());
@@ -151,7 +157,7 @@ private void dtoToEntity(Recipe entity, RecipeDTO dto){
                     item.setSubProduct(sub);
                     item.setUnitCost(sub.calculateUnitCost());
         }
-        
+
         entity.addItem(item);
     }
 }

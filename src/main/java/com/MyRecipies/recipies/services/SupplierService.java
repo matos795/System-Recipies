@@ -37,6 +37,12 @@ public class SupplierService {
         return listDTO;
     }
 
+    public List<SupplierDTO> findAll(){
+        List<Supplier> suppliers = repository.findAll();
+        List<SupplierDTO> listDTO = suppliers.stream().map(x -> new SupplierDTO(x)).collect(Collectors.toList());
+        return listDTO;
+    }
+
     @Transactional(readOnly = true)
     public SupplierDTO findById(Long id){
         Supplier supplier = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Recurso não encontrado!"));
