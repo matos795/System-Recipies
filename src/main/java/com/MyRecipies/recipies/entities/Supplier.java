@@ -8,6 +8,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
@@ -24,6 +26,11 @@ public class Supplier {
     private String phone;
     private String email;
     private String address;
+
+    @ManyToOne
+@JoinColumn(name = "client_id")
+private User client;
+
 
     @OneToMany(mappedBy = "supplier")
     private List<Ingredient> ingredients = new ArrayList<>();
@@ -86,6 +93,14 @@ public class Supplier {
 
     public void setIngredients(List<Ingredient> ingredients) {
         this.ingredients = ingredients;
+    }
+
+    public User getClient() {
+        return client;
+    }
+
+    public void setClient(User client) {
+        this.client = client;
     }
 
 }

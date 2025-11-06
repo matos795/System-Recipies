@@ -1,6 +1,10 @@
 package com.MyRecipies.recipies.dto;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.security.core.GrantedAuthority;
 
 import com.MyRecipies.recipies.entities.User;
 
@@ -11,6 +15,8 @@ public class UserDTO {
     private String email;
     private String phone;
     private LocalDate birthDate;
+
+    private List<String> roles = new ArrayList<>();
     
     public UserDTO() {
     }
@@ -29,6 +35,10 @@ public class UserDTO {
         email = entity.getEmail();
         phone = entity.getPhone();
         birthDate = entity.getBirthDate();
+        
+        for (GrantedAuthority role : entity.getRoles()) {
+            roles.add(role.getAuthority());
+        }
     }
 
     public Long getId() {
@@ -51,5 +61,7 @@ public class UserDTO {
         return birthDate;
     }
 
-    
+    public List<String> getRoles() {
+        return roles;
+    }
 }

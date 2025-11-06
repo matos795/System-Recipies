@@ -28,6 +28,8 @@ public class IngredientDTO {
     @NotNull
     private UnitType unit;
     private Long supplierId;
+
+    private ClientDTO client;
     
     public IngredientDTO() {
     }
@@ -61,6 +63,7 @@ public class IngredientDTO {
         } else {
             supplierId = null;
         }
+        client = new ClientDTO(entity.getClient());
     }
 
     public Long getId() {
@@ -101,6 +104,10 @@ public class IngredientDTO {
 
     public void setImgUrl(String imgUrl) {
         this.imgUrl = imgUrl;
+    }
+
+    public ClientDTO getClient() {
+        return client;
     }
 
     public LocalDate getCreateDate() {

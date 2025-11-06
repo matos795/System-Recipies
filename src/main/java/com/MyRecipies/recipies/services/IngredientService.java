@@ -27,15 +27,25 @@ public class IngredientService {
     @Autowired
     private SupplierRepository supplierRepository;
 
+    @Autowired
+    private AuthService authService;
+
+    @Autowired
+    private UserService userService;
+
     @Transactional(readOnly = true)
     public Page<IngredientDTO> findAll(Pageable pageable){
-        Page<Ingredient> ingredients = repository.findAll(pageable);
+
+        Long userId = userService.authenticated().getId();
+
+        Page<Ingredient> ingredients = repository.findByClientId(userId, pageable);
         return ingredients.map(x -> new IngredientDTO(x));
     }
 
     @Transactional(readOnly = true)
         public IngredientDTO findById(Long id){
             Ingredient ingredient = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Recurso não encontrado!"));
+            authService.validateSelfOrAdmin(ingredient.getClient().getId());
             return new IngredientDTO(ingredient);
         }
 
@@ -43,6 +53,7 @@ public class IngredientService {
     public IngredientDTO insert(IngredientDTO dto){
         Ingredient ingredient = new Ingredient();
         dtoToEntity(ingredient, dto);
+        ingredient.setClient(userService.authenticated());
         ingredient = repository.save(ingredient);
         return new IngredientDTO(ingredient);
     }
@@ -51,6 +62,7 @@ public class IngredientService {
     public IngredientDTO update(IngredientDTO dto, Long id){
         try {
     Ingredient ingredient = repository.getReferenceById(id);
+    authService.validateSelfOrAdmin(ingredient.getClient().getId());
     dtoToEntity(ingredient, dto);
     ingredient = repository.save(ingredient);
         return new IngredientDTO(ingredient);
@@ -65,6 +77,7 @@ public void delete(Long id) {
 		throw new ResourceNotFoundException("Recurso não encontrado");
 	}
 	try {
+            authService.validateSelfOrAdmin(repository.getReferenceById(id).getClient().getId());
         	repository.deleteById(id);    		
 	}
     	catch (DataIntegrityViolationException e) {

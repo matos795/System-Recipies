@@ -20,7 +20,6 @@ import com.MyRecipies.recipies.entities.RecipeItem;
 import com.MyRecipies.recipies.repositories.IngredientRepository;
 import com.MyRecipies.recipies.repositories.ProductRepository;
 import com.MyRecipies.recipies.repositories.RecipeRepository;
-import com.MyRecipies.recipies.repositories.UserRepository;
 import com.MyRecipies.recipies.services.exceptions.DatabaseException;
 import com.MyRecipies.recipies.services.exceptions.ResourceNotFoundException;
 
@@ -39,17 +38,22 @@ public class RecipeService {
     private ProductRepository productRepository;
 
     @Autowired
-    private UserRepository userRepository;
+    private UserService userService;
+
+    @Autowired
+    private AuthService authService;
 
     @Transactional(readOnly = true)
-    public Page<RecipeDTO> findAll(Pageable pageable){
-        Page<Recipe> recipes = recipeRepository.findAll(pageable);
+    public Page<RecipeDTO> findByClientId(Pageable pageable){
+        Long userId = userService.authenticated().getId();
+        Page<Recipe> recipes = recipeRepository.findByClientId(userId, pageable);
         return recipes.map(x -> new RecipeDTO(x));
     }
 
     @Transactional(readOnly = true)
     public RecipeDTO findById(Long id){
         Recipe recipe = recipeRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Recurso não encontrado!"));
+        authService.validateSelfOrAdmin(recipe.getClient().getId());
         return new RecipeDTO(recipe);
     }
 
@@ -57,21 +61,26 @@ public class RecipeService {
     public RecipeDTO insert(RecipeDTO dto){
         Recipe entity = new Recipe();
         dtoToEntity(entity, dto);
+        entity.setClient(userService.authenticated());
         entity = recipeRepository.save(entity);
         return new RecipeDTO(entity);
-    }
+        }
 
-    @Transactional
-    public RecipeDTO update(Long id, RecipeDTO dto){
-        try{
+   @Transactional
+public RecipeDTO update(Long id, RecipeDTO dto){
+    try {
+
         Recipe entity = recipeRepository.getReferenceById(id);
+        authService.validateSelfOrAdmin(entity.getClient().getId());
         dtoToEntity(entity, dto);
         entity = recipeRepository.save(entity);
         return new RecipeDTO(entity);
-        } catch (EntityNotFoundException e) {
+
+    } catch (EntityNotFoundException e) {
         throw new ResourceNotFoundException("Receita não encontrada! ID: " + id);
     }
-    }
+}
+
 
 @Transactional
 public void delete(Long id) {
@@ -79,17 +88,13 @@ public void delete(Long id) {
     Recipe recipe = recipeRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Recurso não encontrado"));
 
+            authService.validateSelfOrAdmin(recipe.getClient().getId());
     try {
-        // Limpa os items para acionar orphanRemoval
+
         recipe.getItems().clear();
-
-        // Pega o produto associado
         Product product = recipe.getProduct();
-
-        // Deleta a receita
         recipeRepository.delete(recipe);
 
-        // Deleta o produto
         if (product != null) {
             productRepository.delete(product);
         }
@@ -100,59 +105,61 @@ public void delete(Long id) {
 }
 
 
-    private void dtoToEntity(Recipe entity, RecipeDTO dto){
+// Método dtoToEntity completo
+private void dtoToEntity(Recipe entity, RecipeDTO dto){
 
-        Product product;
-if (entity.getProduct() != null && entity.getProduct().getId() != null) {
-    Long existingProductId = entity.getProduct().getId();
-    product = productRepository.getReferenceById(existingProductId);
-    product.setName(dto.getProductName());
-    product.setPrice(dto.getProductPrice());
-    product.setImgUrl(dto.getImgUrl());
-    product.setCreateDate(dto.getCreateDate() != null ? dto.getCreateDate() : LocalDate.now());
-    product.setLastUpdateDate(dto.getLastUpdateDate());
-} else {
-    product = new Product();
-    product.setName(dto.getProductName());
-    product.setPrice(dto.getProductPrice());
-    product.setImgUrl(dto.getImgUrl());
-    product.setCreateDate(dto.getCreateDate() != null ? dto.getCreateDate() : LocalDate.now());
-    product.setLastUpdateDate(dto.getLastUpdateDate());
-    product = productRepository.save(product);
-}
-
-        entity.setProduct(product);
-        product.setRecipe(entity);
-        
-        entity.setDescription(dto.getDescription());
-        entity.setAmount(dto.getAmount());
-        entity.setClient(userRepository.getReferenceById(dto.getClient().getId()));
-
-    if (entity.getItems() == null) {
-    entity.setItems(new ArrayList<>());
-} else {
-    entity.getItems().clear();
-}
-
-
-        for (RecipeItemDTO itemDTO : dto.getItems()) {
-            RecipeItem item = new RecipeItem();
-            item.setRecipe(entity);
-            item.setQuantity(itemDTO.getQuantity());
-
-            if (itemDTO.getIngredientId() != null) {
-                Ingredient ing = ingredientRepository.findById(itemDTO.getIngredientId())
-                .orElseThrow(() -> new ResourceNotFoundException("Recurso não encontrado!"));
-                item.setUnitCost(ing.calculateUnitCost());
-                item.setIngredient(ing);
-            } 
-            else if(itemDTO.getSubProductId() != null) {
-                Product sub = productRepository.findById(itemDTO.getSubProductId())
-                .orElseThrow(() -> new ResourceNotFoundException("Recurso não encontrado!"));
-                item.setUnitCost(sub.calculateUnitCost());
-                item.setSubProduct(sub);
-            }
-            entity.addItem(item);
-        }
+    // Produto associado
+    Product product;
+    if (entity.getProduct() != null && entity.getProduct().getId() != null) {
+        // Atualiza o produto existente
+        product = productRepository.getReferenceById(entity.getProduct().getId());
+    } else {
+        // Cria novo produto
+        product = new Product();
     }
+
+    product.setName(dto.getProductName());
+    product.setPrice(dto.getProductPrice());
+    product.setImgUrl(dto.getImgUrl());
+    product.setCreateDate(dto.getCreateDate() != null ? dto.getCreateDate() : LocalDate.now());
+    product.setLastUpdateDate(dto.getLastUpdateDate());
+
+    product = productRepository.save(product);
+
+    entity.setProduct(product);
+    product.setRecipe(entity);
+
+    // Campos da receita
+    entity.setDescription(dto.getDescription());
+    entity.setAmount(dto.getAmount());
+
+    // Limpa itens antigos ou cria lista nova
+    if (entity.getItems() == null) {
+        entity.setItems(new ArrayList<>());
+    } else {
+        entity.getItems().clear();
+    }
+
+    // Adiciona itens da receita
+    for (RecipeItemDTO itemDTO : dto.getItems()) {
+        RecipeItem item = new RecipeItem();
+        item.setRecipe(entity);
+        item.setQuantity(itemDTO.getQuantity());
+
+        if (itemDTO.getIngredientId() != null) {
+            Ingredient ing = ingredientRepository.findById(itemDTO.getIngredientId())
+                .orElseThrow(() -> new ResourceNotFoundException("Ingrediente não encontrado!"));
+            item.setIngredient(ing);
+            item.setUnitCost(ing.calculateUnitCost());
+        } else if(itemDTO.getSubProductId() != null) {
+            Product sub = productRepository.findById(itemDTO.getSubProductId())
+                .orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado!"));
+            item.setSubProduct(sub);
+            item.setUnitCost(sub.calculateUnitCost());
+        }
+
+        entity.addItem(item);
+    }
+}
+
 }
