@@ -37,6 +37,7 @@ public class SupplierService {
         return listDTO;
     }
 
+    @Transactional(readOnly = true)
     public List<SupplierDTO> findAll(){
         List<Supplier> suppliers = repository.findAll();
         List<SupplierDTO> listDTO = suppliers.stream().map(x -> new SupplierDTO(x)).collect(Collectors.toList());

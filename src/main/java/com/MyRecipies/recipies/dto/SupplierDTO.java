@@ -1,5 +1,9 @@
 package com.MyRecipies.recipies.dto;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import com.MyRecipies.recipies.entities.Ingredient;
 import com.MyRecipies.recipies.entities.Supplier;
 import jakarta.validation.constraints.NotBlank;
 
@@ -11,16 +15,22 @@ public class SupplierDTO {
     private String phone;
     private String email;
     private String address;
+
+    private List<IngredientMinDTO> ingredients = new ArrayList<>();
+
+    private ClientDTO client;
     
     public SupplierDTO() {
     }
 
-    public SupplierDTO(Long id, String name, String phone, String email, String address) {
+    public SupplierDTO(Long id, String name, String phone, String email, String address, List<IngredientMinDTO> ingredients, ClientDTO client) {
         this.id = id;
         this.name = name;
         this.phone = phone;
         this.email = email;
         this.address = address;
+        this.ingredients = ingredients;
+        this.client = client;
     }
 
     public SupplierDTO(Supplier entity) {
@@ -29,6 +39,14 @@ public class SupplierDTO {
         phone = entity.getPhone();
         email = entity.getEmail();
         address = entity.getAddress();
+        for (Ingredient ingredient : entity.getIngredients()) {
+            ingredients.add(new IngredientMinDTO(ingredient));
+        }
+        if (entity.getClient() != null) {
+            client = new ClientDTO(entity.getClient());
+        } else {
+            client = null;
+        }
     }
 
     public Long getId() {
@@ -51,5 +69,11 @@ public class SupplierDTO {
         return address;
     }
 
-    
+    public List<IngredientMinDTO> getIngredients() {
+        return ingredients;
+    }
+
+    public ClientDTO getClient() {
+        return client;
+    }
 }
