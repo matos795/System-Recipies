@@ -53,18 +53,21 @@ CREATE TABLE tb_user_role (
 -- 🏭 TABELA SUPPLIERS
 -- ==========================================================
 CREATE TABLE suppliers (
-    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     phone VARCHAR(100),
     email VARCHAR(100),
-    address VARCHAR(100)
+    address VARCHAR(100),
+    client_id BIGINT,
+    CONSTRAINT fk_supplier_user FOREIGN KEY (client_id) REFERENCES tb_user(id)
+    ON DELETE SET NULL
 );
 
 -- ==========================================================
 -- 🧱 TABELA PRODUCTS
 -- ==========================================================
 CREATE TABLE products (
-    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     price NUMERIC(10,2) NOT NULL,
     img_url VARCHAR(255),
@@ -77,13 +80,15 @@ CREATE TABLE products (
 -- agora com client_id
 -- ==========================================================
 CREATE TABLE recipes (
-    product_id INT PRIMARY KEY,
+    product_id BIGINT PRIMARY KEY,
     last_update_date TIMESTAMP,
     description VARCHAR(255),
     amount INT,
     client_id BIGINT,
     
-    CONSTRAINT fk_recipe_product FOREIGN KEY (product_id) REFERENCES products(id),
+    CONSTRAINT fk_recipe_product FOREIGN KEY (product_id)
+    REFERENCES products(id)
+    ON DELETE CASCADE,
     CONSTRAINT fk_recipe_user FOREIGN KEY (client_id) REFERENCES tb_user(id)
 );
 
@@ -92,7 +97,7 @@ CREATE TABLE recipes (
 -- adicionada FK client_id
 -- ==========================================================
 CREATE TABLE ingredients (
-    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     brand VARCHAR(50),
     price_cost NUMERIC(10,2) NOT NULL,
@@ -101,7 +106,7 @@ CREATE TABLE ingredients (
     last_update_date TIMESTAMP,
     quantity_per_unit NUMERIC(10,2) NOT NULL,
     unit VARCHAR(20) NOT NULL,
-    supplier_id INT,
+    supplier_id BIGINT,
     client_id BIGINT,
 
     CONSTRAINT fk_ingredient_supplier FOREIGN KEY (supplier_id) REFERENCES suppliers(id),
@@ -112,15 +117,17 @@ CREATE TABLE ingredients (
 -- 🍰 TABELA RECIPE_ITEMS
 -- ==========================================================
 CREATE TABLE recipe_items (
-    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    recipe_id INT NOT NULL,
-    sub_product_id INT,
-    ingredient_id INT,
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    recipe_id BIGINT NOT NULL,
+    sub_product_id BIGINT,
+    ingredient_id BIGINT,
     quantity NUMERIC(10,2) NOT NULL,
     unit_cost NUMERIC(10,2) NOT NULL,
     total_cost NUMERIC(10,2) NOT NULL,
 
-    CONSTRAINT fk_recipe_items_recipe FOREIGN KEY (recipe_id) REFERENCES recipes(product_id),
+    CONSTRAINT fk_recipe_items_recipe FOREIGN KEY (recipe_id)
+    REFERENCES recipes(product_id)
+    ON DELETE CASCADE,
     CONSTRAINT fk_recipe_items_product FOREIGN KEY (sub_product_id) REFERENCES products(id),
     CONSTRAINT fk_recipe_items_ingredient FOREIGN KEY (ingredient_id) REFERENCES ingredients(id),
 
