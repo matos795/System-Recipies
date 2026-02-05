@@ -6,7 +6,6 @@ import jakarta.validation.constraints.Positive;
 
 public class RecipeItemDTO {
 
-    private Long id;
     private Long subProductId;
     private Long ingredientId;
     @NotNull
@@ -17,18 +16,9 @@ public class RecipeItemDTO {
     }
 
     public RecipeItemDTO(RecipeItem item) {
-        this.id = item.getId();
         this.subProductId = item.getSubProduct() != null ? item.getSubProduct().getId() : null;
         this.ingredientId = item.getIngredient() != null ? item.getIngredient().getId() : null;
         this.quantity = item.getQuantity();
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public Long getSubProductId() {

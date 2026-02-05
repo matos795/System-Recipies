@@ -14,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.MyRecipies.recipies.dto.RecipeDTO;
 import com.MyRecipies.recipies.dto.RecipeItemDTO;
-import com.MyRecipies.recipies.dto.RecipeItemDetailDTO;
 import com.MyRecipies.recipies.entities.Ingredient;
 import com.MyRecipies.recipies.entities.Product;
 import com.MyRecipies.recipies.entities.Recipe;
@@ -142,18 +141,17 @@ private void dtoToEntity(Recipe entity, RecipeDTO dto){
         entity.getItems().clear();
     }
 
-    for (RecipeItemDetailDTO itemDTO : dto.getItems()) {
+    for (RecipeItemDTO itemDTO : dto.getItems()) {
         RecipeItem item = new RecipeItem();
-        RecipeItemDTO tempDTO = new RecipeItemDTO(item);
         item.setRecipe(entity);
         item.setQuantity(itemDTO.getQuantity());
 
-        if (itemDTO.getIngredientId(tempDTO) != null) {
-            Ingredient ing = ingredientRepository.findById(itemDTO.getIngredientId(tempDTO)).orElseThrow(() -> new ResourceNotFoundException("Ingrediente não encontrado!"));
+        if (itemDTO.getIngredientId() != null) {
+            Ingredient ing = ingredientRepository.findById(itemDTO.getIngredientId()).orElseThrow(() -> new ResourceNotFoundException("Ingrediente não encontrado!"));
                 authService.validateSelfOrAdmin(ing.getClient().getId());
                     item.setIngredient(ing);
-        } else if(itemDTO.getSubProductId(new RecipeItemDTO(item)) != null) {
-            Product sub = productRepository.findById(itemDTO.getSubProductId(tempDTO)).orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado!"));
+        } else if(itemDTO.getSubProductId() != null) {
+            Product sub = productRepository.findById(itemDTO.getSubProductId()).orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado!"));
                 authService.validateSelfOrAdmin(sub.getRecipe().getClient().getId());
                     item.setSubProduct(sub);
         }

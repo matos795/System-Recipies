@@ -27,7 +27,7 @@ public class RecipeDTO {
     private LocalDateTime lastUpdateDate;
 
     // Itens da receita
-    private List<RecipeItemDetailDTO> items;
+    private List<RecipeItemDTO> items;
 
     private ClientDTO client;
 
@@ -36,7 +36,7 @@ public class RecipeDTO {
     }
 
     public RecipeDTO(String productName, Double productPrice, String imgUrl, Long id, String description,
-            Integer amount, LocalDate createDate, LocalDateTime lastUpdateDate, List<RecipeItemDetailDTO> items) {
+            Integer amount, LocalDate createDate, LocalDateTime lastUpdateDate, List<RecipeItemDTO> items) {
         this.productName = productName;
         this.productPrice = productPrice;
         this.imgUrl = imgUrl;
@@ -57,7 +57,7 @@ public class RecipeDTO {
         amount = entity.getAmount();
         createDate = entity.getProduct().getCreateDate();
         lastUpdateDate = entity.getLastUpdateDate();
-        items = entity.getItems().stream().map(x -> new RecipeItemDetailDTO(x)).collect(Collectors.toList());
+        items = entity.getItems().stream().map(x -> new RecipeItemDTO(x)).collect(Collectors.toList());
         client = new ClientDTO(entity.getClient());
     }
 
@@ -125,11 +125,11 @@ public class RecipeDTO {
         this.lastUpdateDate = lastUpdateDate;
     }
 
-    public List<RecipeItemDetailDTO> getItems() {
+    public List<RecipeItemDTO> getItems() {
         return items;
     }
 
-    public void setItems(List<RecipeItemDetailDTO> items) {
+    public void setItems(List<RecipeItemDTO> items) {
         this.items = items;
     }
 
