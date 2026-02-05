@@ -90,4 +90,11 @@ private Long id;
         return totalCost;
     }
     
+    public Long getSubProductId(RecipeItemDTO item) {
+        return item.getSubProductId();
+    }
+
+    public Long getIngredientId(RecipeItemDTO item) {
+        return item.getSubProductId();
+    }
 }
