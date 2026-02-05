@@ -107,13 +107,6 @@ public class Product {
         this.recipe = recipe;
     }
 
-    public Double calculateUnitCost() {
-    if (price != null && recipe.getAmount() != null && recipe.getAmount() > 0) {
-        return price / recipe.getAmount();
-    }
-    return null;
-}
-
     @PrePersist
 protected void onCreate() {
     this.createDate = LocalDate.now();
@@ -123,6 +116,15 @@ protected void onCreate() {
 @PreUpdate
 protected void onUpdate() {
     this.lastUpdateDate = LocalDateTime.now();
+}
+
+public Double calculateUnitCost() {
+    if (this.recipe == null) return 0.0; // produtos sem receita não têm custo calculado
+
+    Double totalCost = this.recipe.calculateTotalCost();
+    if (this.recipe.getAmount() == 0) return 0.0;
+
+    return totalCost / this.recipe.getAmount();
 }
     
 }

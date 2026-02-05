@@ -131,4 +131,31 @@ protected void onUpdate() {
     this.lastUpdateDate = LocalDateTime.now();
 }
 
+public Double calculateTotalCost() {
+    return items.stream()
+            .mapToDouble(RecipeItem::getTotalCost)
+            .sum();
+}
+
+public Double calculateUnitCost() {
+    if (amount == 0) return 0.0;
+    return calculateTotalCost() / amount;
+}
+
+public Double calculateUnitProfit() {
+    return product.getPrice() - calculateUnitCost();
+}
+
+public Double calculateTotalProfit() {
+    return calculateUnitProfit() * amount;
+}
+
+public Double calculateProfitPercentage() {
+    Double unitCost = calculateUnitCost();
+    if (unitCost == 0) return 0.0;
+
+    return (calculateUnitProfit() / unitCost) * 100.0;
+}
+
+
 }

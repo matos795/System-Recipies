@@ -122,17 +122,20 @@ CREATE TABLE recipe_items (
     sub_product_id BIGINT,
     ingredient_id BIGINT,
     quantity NUMERIC(10,2) NOT NULL,
-    unit_cost NUMERIC(10,2) NOT NULL,
-    total_cost NUMERIC(10,2) NOT NULL,
 
     CONSTRAINT fk_recipe_items_recipe FOREIGN KEY (recipe_id)
-    REFERENCES recipes(product_id)
-    ON DELETE CASCADE,
-    CONSTRAINT fk_recipe_items_product FOREIGN KEY (sub_product_id) REFERENCES products(id),
-    CONSTRAINT fk_recipe_items_ingredient FOREIGN KEY (ingredient_id) REFERENCES ingredients(id),
+        REFERENCES recipes(product_id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_recipe_items_product FOREIGN KEY (sub_product_id)
+        REFERENCES products(id),
+
+    CONSTRAINT fk_recipe_items_ingredient FOREIGN KEY (ingredient_id)
+        REFERENCES ingredients(id),
 
     CONSTRAINT chk_one_fk CHECK (
         (sub_product_id IS NOT NULL AND ingredient_id IS NULL)
         OR (sub_product_id IS NULL AND ingredient_id IS NOT NULL)
     )
 );
+

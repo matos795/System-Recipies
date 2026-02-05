@@ -144,10 +144,6 @@ public class Ingredient {
         this.unit = unit;
     }
 
-    public Double getUnitCost() {
-        return calculateUnitCost();
-    }
-
     public Supplier getSupplier() {
         return supplier;
     }
@@ -155,13 +151,6 @@ public class Ingredient {
     public void setSupplier(Supplier supplier) {
         this.supplier = supplier;
     }
-
-    public Double calculateUnitCost() {
-    if (priceCost != null && quantityPerUnit != null && quantityPerUnit > 0) {
-        return priceCost / quantityPerUnit;
-    }
-    return null;
-}
 
 @PrePersist
 protected void onCreate() {
@@ -181,5 +170,9 @@ public User getClient() {
 public void setClient(User client) {
     this.client = client;
 }
+
+    public Double calculateUnitCost() {
+        return this.priceCost / this.quantityPerUnit;
+    }
 
 }

@@ -57,12 +57,12 @@ INSERT INTO ingredients (name, brand, price_cost, img_url, create_date, last_upd
 -- 🍰 RECIPE_ITEMS
 -- ==========================================================
 
--- Itens da receita 1 (Bolo)
-INSERT INTO recipe_items (recipe_id, ingredient_id, sub_product_id, quantity, unit_cost, total_cost) VALUES (1, 1, NULL, 0.5, 2.25, 2.25);
-INSERT INTO recipe_items (recipe_id, ingredient_id, sub_product_id, quantity, unit_cost, total_cost) VALUES (1, 2, NULL, 0.3, 0.96, 0.96);
-INSERT INTO recipe_items (recipe_id, ingredient_id, sub_product_id, quantity, unit_cost, total_cost) VALUES (1, 3, NULL, 4, 0.70, 2.80);
+-- Bolo
+INSERT INTO recipe_items (recipe_id, ingredient_id, sub_product_id, quantity) VALUES (1, 1, NULL, 0.5);
+INSERT INTO recipe_items (recipe_id, ingredient_id, sub_product_id, quantity) VALUES (1, 2, NULL, 0.3);
+INSERT INTO recipe_items (recipe_id, ingredient_id, sub_product_id, quantity) VALUES (1, 3, NULL, 4);
 
--- Itens da receita 2 (Torta)
-INSERT INTO recipe_items (recipe_id, ingredient_id, sub_product_id, quantity, unit_cost, total_cost) VALUES (2, 2, NULL, 0.2, 0.64, 0.64);
-INSERT INTO recipe_items (recipe_id, ingredient_id, sub_product_id, quantity, unit_cost, total_cost) VALUES (2, 3, NULL, 3, 0.70, 2.10);
-INSERT INTO recipe_items (recipe_id, ingredient_id, sub_product_id, quantity, unit_cost, total_cost) VALUES (2, 4, NULL, 4, 0.50, 2.00);
+-- Torta
+INSERT INTO recipe_items (recipe_id, ingredient_id, sub_product_id, quantity) VALUES (2, 2, NULL, 0.2);
+INSERT INTO recipe_items (recipe_id, ingredient_id, sub_product_id, quantity) VALUES (2, 3, NULL, 3);
+INSERT INTO recipe_items (recipe_id, ingredient_id, sub_product_id, quantity) VALUES (2, 4, NULL, 4);

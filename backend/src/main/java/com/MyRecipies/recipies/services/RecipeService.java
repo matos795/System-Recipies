@@ -1,6 +1,7 @@
 package com.MyRecipies.recipies.services;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -125,10 +126,9 @@ private void dtoToEntity(Recipe entity, RecipeDTO dto){
     product.setPrice(dto.getProductPrice());
     product.setImgUrl(dto.getImgUrl());
     product.setCreateDate(dto.getCreateDate() != null ? dto.getCreateDate() : LocalDate.now());
-    product.setLastUpdateDate(dto.getLastUpdateDate());
+    product.setLastUpdateDate(LocalDateTime.now());
 
     product = productRepository.save(product);
-
     entity.setProduct(product);
     product.setRecipe(entity);
 
@@ -150,12 +150,10 @@ private void dtoToEntity(Recipe entity, RecipeDTO dto){
             Ingredient ing = ingredientRepository.findById(itemDTO.getIngredientId()).orElseThrow(() -> new ResourceNotFoundException("Ingrediente não encontrado!"));
                 authService.validateSelfOrAdmin(ing.getClient().getId());
                     item.setIngredient(ing);
-                    item.setUnitCost(ing.calculateUnitCost());
         } else if(itemDTO.getSubProductId() != null) {
             Product sub = productRepository.findById(itemDTO.getSubProductId()).orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado!"));
                 authService.validateSelfOrAdmin(sub.getRecipe().getClient().getId());
                     item.setSubProduct(sub);
-                    item.setUnitCost(sub.calculateUnitCost());
         }
 
         entity.addItem(item);

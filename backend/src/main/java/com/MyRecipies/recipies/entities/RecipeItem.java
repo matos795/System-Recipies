@@ -31,23 +31,15 @@ public class RecipeItem {
     @Column(nullable = false)
     private Double quantity;
     
-    @Column(name = "unit_cost", nullable = false)
-    private Double unitCost;
-
-    @Column(name = "total_cost", nullable = false)
-    private Double totalCost;
-    
     public RecipeItem() {
     }
 
-    public RecipeItem(Long id, Recipe recipe, Product subProduct, Ingredient ingredient, Double quantity, Double unitCost) {
+    public RecipeItem(Long id, Recipe recipe, Product subProduct, Ingredient ingredient, Double quantity) {
         this.id = id;
         this.recipe = recipe;
         this.subProduct = subProduct;
         this.ingredient = ingredient;
         this.quantity = quantity;
-        this.unitCost = unitCost;
-        updateTotalCost();
     }
 
     public Long getId() {
@@ -88,29 +80,20 @@ public class RecipeItem {
 
     public void setQuantity(Double quantity) {
         this.quantity = quantity;
-        updateTotalCost();
     }
 
     public Double getUnitCost() {
-        return unitCost;
+    if (ingredient != null) {
+        return ingredient.calculateUnitCost();
     }
+    if (subProduct != null) {
+        return subProduct.calculateUnitCost();
+    }
+    return 0.0;
+}
 
-    public void setUnitCost(Double unitCost) {
-        this.unitCost = unitCost;
-        updateTotalCost();
-    }
+public Double getTotalCost() {
+    return getUnitCost() * quantity;
+}
 
-    public Double getTotalCost() {
-        return totalCost;
-    }
-
-    public void setTotalCost(Double totalCost) {
-        this.totalCost = totalCost;
-    }
-
-    private void updateTotalCost(){
-        if (quantity != null && unitCost != null) {
-            this.totalCost = quantity * unitCost;
-        }
-    }
 }
