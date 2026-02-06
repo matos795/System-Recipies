@@ -10,6 +10,7 @@ import com.MyRecipies.recipies.entities.Ingredient;
 import com.MyRecipies.recipies.entities.Product;
 import com.MyRecipies.recipies.entities.Recipe;
 import com.MyRecipies.recipies.entities.RecipeItem;
+import com.MyRecipies.recipies.entities.Supplier;
 import com.MyRecipies.recipies.entities.User;
 import com.MyRecipies.recipies.entities.enums.UnitType;
 
@@ -87,11 +88,26 @@ public class Factory {
             item.setRecipe(recipe);
             item.setIngredient(ing);
             item.setQuantity(1.0);
-
             items.add(item);
         }
 
         recipe.setItems(items);
         return recipe;
     }
+
+    /* ===================== SUPPLIER ===================== */
+
+    public static Supplier createSupplier(User client) {
+        Supplier supplier = new Supplier();
+        supplier.setName("Sugar");
+        supplier.setAddress("123 Test Street");
+        supplier.setPhone("123-456-7890");
+        supplier.setEmail("supplier" + counter.incrementAndGet() + "@example.com");
+        supplier.setClient(client);
+        return supplier;
+    }
+
+    /* ===================== XXXXXXX ===================== */
+
+
 }
