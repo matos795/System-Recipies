@@ -19,8 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -28,22 +26,22 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.MyRecipies.recipies.config.SecurityConfig;
-import com.MyRecipies.recipies.controller.IngredientController;
-import com.MyRecipies.recipies.dto.IngredientDTO;
-import com.MyRecipies.recipies.services.IngredientService;
+import com.MyRecipies.recipies.controller.SupplierController;
+import com.MyRecipies.recipies.dto.SupplierDTO;
+import com.MyRecipies.recipies.services.SupplierService;
 import com.MyRecipies.recipies.services.exceptions.ResourceNotFoundException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-@WebMvcTest(IngredientController.class)
+@WebMvcTest(SupplierController.class)
 @AutoConfigureMockMvc(addFilters = true)
 @Import(SecurityConfig.class)
-public class IngredientControllerTests {
+public class SupplierControllerTests {
 
     @Autowired
     private MockMvc mockMvc;
 
     @MockitoBean
-    private IngredientService ingredientService;
+    private SupplierService supplierService;
 
     @MockitoBean
     private JwtDecoder jwtDecoder;
@@ -54,8 +52,7 @@ public class IngredientControllerTests {
     private String jsonBody;
     private Long existingId;
     private Long nonExistingId;
-    private PageImpl<IngredientDTO> page;
-    private IngredientDTO ingredientDTO;
+    private SupplierDTO supplierDTO;
 
     @BeforeEach
     void setUp() throws Exception {
@@ -63,124 +60,122 @@ public class IngredientControllerTests {
         existingId = 1L;
         nonExistingId = 1000L;
         
-        ingredientDTO = new IngredientDTO();
-        ingredientDTO.setId(existingId);
+        supplierDTO = new SupplierDTO();
+        supplierDTO.setId(existingId);
 
-        jsonBody = objectMapper.writeValueAsString(ingredientDTO);
-
-        page = new PageImpl<>(List.of(ingredientDTO));
+        jsonBody = objectMapper.writeValueAsString(supplierDTO);
     }
 
     @Test
     @WithMockUser(authorities = "ROLE_CLIENT")
-    public void findByClientIdShouldReturnPageOfIngredientsAnd200() throws Exception {
+    public void findByClientIdShouldReturnListOfSuppliersAnd200() throws Exception {
         
-        Mockito.when(ingredientService.findByClientId(any(Pageable.class))).thenReturn(page);
+        Mockito.when(supplierService.findByClientId()).thenReturn(List.of(supplierDTO));
 
-        mockMvc.perform(get("/ingredients")
+        mockMvc.perform(get("/suppliers")
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.content[0].id").value(existingId));
+        .andExpect(jsonPath("$[0].id").value(existingId));
 
-        Mockito.verify(ingredientService).findByClientId(any(Pageable.class));
+        Mockito.verify(supplierService).findByClientId();
     }
 
     @Test
     public void findByClientIdShouldReturn401WhenNotAuthenticated() throws Exception {
 
-        mockMvc.perform(get("/ingredients")).andExpect(status().isUnauthorized());
+        mockMvc.perform(get("/suppliers")).andExpect(status().isUnauthorized());
 
-        Mockito.verifyNoInteractions(ingredientService);
+        Mockito.verifyNoInteractions(supplierService);
     }
 
     @Test
     @WithMockUser(roles = "OTHER")
     public void findByClientIdShouldReturn403WhenUserHasWrongRole() throws Exception {
 
-        mockMvc.perform(get("/ingredients")).andExpect(status().isForbidden());
+        mockMvc.perform(get("/suppliers")).andExpect(status().isForbidden());
 
-        Mockito.verifyNoInteractions(ingredientService);
+        Mockito.verifyNoInteractions(supplierService);
     }
 
     @Test
     @WithMockUser(authorities = "ROLE_ADMIN")
-    public void findAllShouldReturnPageWhenUserHasAdminRole() throws Exception {
+    public void findAllShouldReturnListWhenUserHasAdminRole() throws Exception {
 
-        Mockito.when(ingredientService.findAll(any(Pageable.class))).thenReturn(page);
+        Mockito.when(supplierService.findAll()).thenReturn(List.of(supplierDTO));
 
-        mockMvc.perform(get("/ingredients/all").accept(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get("/suppliers/all").accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.content[0].id").value(existingId));
+        .andExpect(jsonPath("$[0].id").value(existingId));
 
-        Mockito.verify(ingredientService).findAll(any(Pageable.class));
+        Mockito.verify(supplierService).findAll();
     }
 
     @Test
     public void findAllShouldReturn401WhenNotAuthenticated() throws Exception {
 
-        mockMvc.perform(get("/ingredients/all")).andExpect(status().isUnauthorized());
+        mockMvc.perform(get("/suppliers/all")).andExpect(status().isUnauthorized());
 
-        Mockito.verifyNoInteractions(ingredientService);
+        Mockito.verifyNoInteractions(supplierService);
     }
 
     @Test
     @WithMockUser(roles = "OTHER")
     public void findAllShouldReturn403WhenUserHasWrongRole() throws Exception {
 
-        mockMvc.perform(get("/ingredients/all")).andExpect(status().isForbidden());
+        mockMvc.perform(get("/suppliers/all")).andExpect(status().isForbidden());
 
-        Mockito.verifyNoInteractions(ingredientService);
+        Mockito.verifyNoInteractions(supplierService);
     }
 
     @Test
     @WithMockUser(authorities = "ROLE_CLIENT")
     public void findByIdShouldReturn200WhenIdExists() throws Exception {
 
-        Mockito.when(ingredientService.findById(existingId)).thenReturn(ingredientDTO);
+        Mockito.when(supplierService.findById(existingId)).thenReturn(supplierDTO);
 
-        mockMvc.perform(get("/ingredients/{id}", existingId)
+        mockMvc.perform(get("/suppliers/{id}", existingId)
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").value(existingId));
 
-        Mockito.verify(ingredientService).findById(existingId);
+        Mockito.verify(supplierService).findById(existingId);
     }
 
     @Test
     @WithMockUser(authorities = "ROLE_CLIENT")
     public void findByIdShouldReturn404WhenIdDoesNotExist() throws Exception {
 
-        Mockito.when(ingredientService.findById(nonExistingId)).thenThrow(ResourceNotFoundException.class);
+        Mockito.when(supplierService.findById(nonExistingId)).thenThrow(ResourceNotFoundException.class);
 
-        mockMvc.perform(get("/ingredients/{id}", nonExistingId)).andExpect(status().isNotFound());
+        mockMvc.perform(get("/suppliers/{id}", nonExistingId)).andExpect(status().isNotFound());
 
-        Mockito.verify(ingredientService).findById(nonExistingId);
+        Mockito.verify(supplierService).findById(nonExistingId);
     }
 
     @Test
     public void findByIdShouldReturn401WhenNotAuthenticated() throws Exception {
 
-        mockMvc.perform(get("/ingredients/{id}", existingId)).andExpect(status().isUnauthorized());
+        mockMvc.perform(get("/suppliers/{id}", existingId)).andExpect(status().isUnauthorized());
 
-        Mockito.verifyNoInteractions(ingredientService);
+        Mockito.verifyNoInteractions(supplierService);
     }
 
     @Test
     @WithMockUser(roles = "OTHER")
     public void findByIdShouldReturn403WhenUserHasWrongRole() throws Exception {
 
-        mockMvc.perform(get("/ingredients/{id}", existingId)).andExpect(status().isForbidden());
+        mockMvc.perform(get("/suppliers/{id}", existingId)).andExpect(status().isForbidden());
 
-        Mockito.verifyNoInteractions(ingredientService);
+        Mockito.verifyNoInteractions(supplierService);
     }
 
     @Test
     @WithMockUser(authorities = "ROLE_CLIENT")
-    public void insertShouldReturnIngredientDTOCreated() throws Exception {
+    public void insertShouldReturnSupplierDTOCreated() throws Exception {
 
-        Mockito.when(ingredientService.insert(any())).thenReturn(ingredientDTO);
+        Mockito.when(supplierService.insert(any())).thenReturn(supplierDTO);
 
-        mockMvc.perform(post("/ingredients")
+        mockMvc.perform(post("/suppliers")
         .with(csrf())
         .content(jsonBody)
         .contentType(MediaType.APPLICATION_JSON)
@@ -188,134 +183,134 @@ public class IngredientControllerTests {
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.id").value(existingId));
 
-        Mockito.verify(ingredientService).insert(any());
+        Mockito.verify(supplierService).insert(any());
     }
 
     @Test
     public void insertShouldReturn401WhenNotAuthenticated() throws Exception { 
 
-        mockMvc.perform(post("/ingredients")
+        mockMvc.perform(post("/suppliers")
         .with(csrf())
         .content(jsonBody)
         .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized());
 
-        Mockito.verifyNoInteractions(ingredientService);
+        Mockito.verifyNoInteractions(supplierService);
     }
 
     @Test
     @WithMockUser(roles = "OTHER")
     public void insertShouldReturn403WhenUserHasWrongRole() throws Exception {
 
-        mockMvc.perform(post("/ingredients")
+        mockMvc.perform(post("/suppliers")
         .with(csrf())
         .content(jsonBody)
         .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
-        Mockito.verifyNoInteractions(ingredientService);
+        Mockito.verifyNoInteractions(supplierService);
     }
 
     @Test
     @WithMockUser(authorities = "ROLE_CLIENT")
     public void updateShouldReturn200WhenIdExists() throws Exception {
 
-        Mockito.when(ingredientService.update(any(), eq(existingId))).thenReturn(ingredientDTO);
+        Mockito.when(supplierService.update(eq(existingId), any())).thenReturn(supplierDTO);
 
-        mockMvc.perform(put("/ingredients/{id}", existingId)
+        mockMvc.perform(put("/suppliers/{id}", existingId)
         .with(csrf())
         .content(jsonBody)
         .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").value(existingId));
 
-        Mockito.verify(ingredientService).update(any(), eq(existingId));
+        Mockito.verify(supplierService).update(eq(existingId), any());
     }
 
     @Test
     @WithMockUser(authorities = "ROLE_CLIENT")
     public void updateShouldReturn404WhenIdDoesNotExist() throws Exception {
 
-        Mockito.when(ingredientService.update(any(), eq(nonExistingId))).thenThrow(ResourceNotFoundException.class);
+        Mockito.when(supplierService.update(eq(nonExistingId), any())).thenThrow(ResourceNotFoundException.class);
 
-        mockMvc.perform(put("/ingredients/{id}", nonExistingId)
+        mockMvc.perform(put("/suppliers/{id}", nonExistingId)
         .with(csrf())
         .content(jsonBody)
         .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isNotFound());
 
-        Mockito.verify(ingredientService).update(any(), eq(nonExistingId));
+        Mockito.verify(supplierService).update(eq(nonExistingId), any());
     }
 
     @Test
     public void updateShouldReturn401WhenNotAuthenticated() throws Exception {
 
-        mockMvc.perform(put("/ingredients/{id}", existingId)
+        mockMvc.perform(put("/suppliers/{id}", existingId)
         .with(csrf())
         .content(jsonBody)
         .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized());
 
-        Mockito.verifyNoInteractions(ingredientService);
+        Mockito.verifyNoInteractions(supplierService);
     }
 
     @Test
     @WithMockUser(roles = "OTHER")
     public void updateShouldReturn403WhenUserHasWrongRole() throws Exception {
 
-        mockMvc.perform(put("/ingredients/{id}", existingId)
+        mockMvc.perform(put("/suppliers/{id}", existingId)
         .with(csrf())
         .content(jsonBody)
         .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
-        Mockito.verifyNoInteractions(ingredientService);
+        Mockito.verifyNoInteractions(supplierService);
     }
 
     @Test
     @WithMockUser(authorities = "ROLE_CLIENT")
     public void deleteShouldReturnNoContentWhenIdExists() throws Exception {
 
-        Mockito.doNothing().when(ingredientService).delete(existingId);
+        Mockito.doNothing().when(supplierService).delete(existingId);
 
-        mockMvc.perform(delete("/ingredients/{id}", existingId)
+        mockMvc.perform(delete("/suppliers/{id}", existingId)
         .with(csrf()))
         .andExpect(status().isNoContent());
 
-        Mockito.verify(ingredientService).delete(existingId);
+        Mockito.verify(supplierService).delete(existingId);
     }
 
     @Test
     @WithMockUser(authorities = "ROLE_CLIENT")
     public void deleteShouldReturn404WhenIdDoesNotExist() throws Exception {
 
-        Mockito.doThrow(ResourceNotFoundException.class).when(ingredientService).delete(nonExistingId);
+        Mockito.doThrow(ResourceNotFoundException.class).when(supplierService).delete(nonExistingId);
 
-        mockMvc.perform(delete("/ingredients/{id}", nonExistingId)
+        mockMvc.perform(delete("/suppliers/{id}", nonExistingId)
         .with(csrf()))
         .andExpect(status().isNotFound());
 
-        Mockito.verify(ingredientService).delete(nonExistingId);
+        Mockito.verify(supplierService).delete(nonExistingId);
     }
 
     @Test
     public void deleteShouldReturn401WhenNotAuthenticated() throws Exception {
 
-        mockMvc.perform(delete("/ingredients/{id}", existingId)
+        mockMvc.perform(delete("/suppliers/{id}", existingId)
         .with(csrf()))
         .andExpect(status().isUnauthorized());
 
-        Mockito.verifyNoInteractions(ingredientService);
+        Mockito.verifyNoInteractions(supplierService);
     }
 
     @Test
     @WithMockUser(roles = "OTHER")
     public void deleteShouldReturn403WhenUserHasWrongRole() throws Exception {
 
-        mockMvc.perform(delete("/ingredients/{id}", existingId)
+        mockMvc.perform(delete("/suppliers/{id}", existingId)
         .with(csrf()))
         .andExpect(status().isForbidden());
 
-        Mockito.verifyNoInteractions(ingredientService);
+        Mockito.verifyNoInteractions(supplierService);
     }
 }
