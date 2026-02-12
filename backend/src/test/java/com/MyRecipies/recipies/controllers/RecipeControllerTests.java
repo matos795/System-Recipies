@@ -74,7 +74,7 @@ public class RecipeControllerTests {
     }
 
     @Test
-    @WithMockUser(authorities = "ROLE_CLIENT")
+    @WithMockUser(roles = "CLIENT")
     public void findByClientIdShouldReturnPageOfRecipesAnd200() throws Exception {
         
         Mockito.when(recipeService.findByClientId(any(Pageable.class))).thenReturn(page);
@@ -102,7 +102,7 @@ public class RecipeControllerTests {
     }
 
     @Test
-    @WithMockUser(authorities = "ROLE_ADMIN")
+    @WithMockUser(roles = "ADMIN")
     public void findAllShouldReturnPageWhenUserHasAdminRole() throws Exception {
 
         Mockito.when(recipeService.findAll(any(Pageable.class))).thenReturn(page);
@@ -130,7 +130,7 @@ public class RecipeControllerTests {
     }
 
     @Test
-    @WithMockUser(authorities = "ROLE_CLIENT")
+    @WithMockUser(roles = "CLIENT")
     public void findByIdShouldReturn200WhenIdExists() throws Exception {
 
         Mockito.when(recipeService.findById(existingId)).thenReturn(recipeDTO);
@@ -143,7 +143,7 @@ public class RecipeControllerTests {
     }
 
     @Test
-    @WithMockUser(authorities = "ROLE_CLIENT")
+    @WithMockUser(roles = "CLIENT")
     public void findByIdShouldReturn404WhenIdDoesNotExist() throws Exception {
 
         Mockito.when(recipeService.findById(nonExistingId)).thenThrow(ResourceNotFoundException.class);
@@ -171,7 +171,7 @@ public class RecipeControllerTests {
     }
 
     @Test
-    @WithMockUser(authorities = "ROLE_CLIENT")
+    @WithMockUser(roles = "CLIENT")
     public void insertShouldReturnRecipeDTOCreated() throws Exception {
 
         Mockito.when(recipeService.insert(any())).thenReturn(recipeDTO);
@@ -213,7 +213,7 @@ public class RecipeControllerTests {
     }
 
     @Test
-    @WithMockUser(authorities = "ROLE_CLIENT")
+    @WithMockUser(roles = "CLIENT")
     public void updateShouldReturn200WhenIdExists() throws Exception {
 
         Mockito.when(recipeService.update(eq(existingId), any())).thenReturn(recipeDTO);
@@ -228,7 +228,7 @@ public class RecipeControllerTests {
     }
 
     @Test
-    @WithMockUser(authorities = "ROLE_CLIENT")
+    @WithMockUser(roles = "CLIENT")
     public void updateShouldReturn404WhenIdDoesNotExist() throws Exception {
 
         Mockito.when(recipeService.update(eq(nonExistingId), any())).thenThrow(ResourceNotFoundException.class);
@@ -268,7 +268,7 @@ public class RecipeControllerTests {
     }
 
     @Test
-    @WithMockUser(authorities = "ROLE_CLIENT")
+    @WithMockUser(roles = "CLIENT")
     public void deleteShouldReturnNoContentWhenIdExists() throws Exception {
 
         Mockito.doNothing().when(recipeService).delete(existingId);
@@ -281,7 +281,7 @@ public class RecipeControllerTests {
     }
 
     @Test
-    @WithMockUser(authorities = "ROLE_CLIENT")
+    @WithMockUser(roles = "CLIENT")
     public void deleteShouldReturn404WhenIdDoesNotExist() throws Exception {
 
         Mockito.doThrow(ResourceNotFoundException.class).when(recipeService).delete(nonExistingId);

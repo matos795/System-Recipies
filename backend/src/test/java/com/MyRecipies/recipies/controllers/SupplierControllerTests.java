@@ -67,7 +67,7 @@ public class SupplierControllerTests {
     }
 
     @Test
-    @WithMockUser(authorities = "ROLE_CLIENT")
+    @WithMockUser(roles = "CLIENT")
     public void findByClientIdShouldReturnListOfSuppliersAnd200() throws Exception {
         
         Mockito.when(supplierService.findByClientId()).thenReturn(List.of(supplierDTO));
@@ -98,7 +98,7 @@ public class SupplierControllerTests {
     }
 
     @Test
-    @WithMockUser(authorities = "ROLE_ADMIN")
+    @WithMockUser(roles = "ADMIN")
     public void findAllShouldReturnListWhenUserHasAdminRole() throws Exception {
 
         Mockito.when(supplierService.findAll()).thenReturn(List.of(supplierDTO));
@@ -128,7 +128,7 @@ public class SupplierControllerTests {
     }
 
     @Test
-    @WithMockUser(authorities = "ROLE_CLIENT")
+    @WithMockUser(roles = "CLIENT")
     public void findByIdShouldReturn200WhenIdExists() throws Exception {
 
         Mockito.when(supplierService.findById(existingId)).thenReturn(supplierDTO);
@@ -142,7 +142,7 @@ public class SupplierControllerTests {
     }
 
     @Test
-    @WithMockUser(authorities = "ROLE_CLIENT")
+    @WithMockUser(roles = "CLIENT")
     public void findByIdShouldReturn404WhenIdDoesNotExist() throws Exception {
 
         Mockito.when(supplierService.findById(nonExistingId)).thenThrow(ResourceNotFoundException.class);
@@ -170,7 +170,7 @@ public class SupplierControllerTests {
     }
 
     @Test
-    @WithMockUser(authorities = "ROLE_CLIENT")
+    @WithMockUser(roles = "CLIENT")
     public void insertShouldReturnSupplierDTOCreated() throws Exception {
 
         Mockito.when(supplierService.insert(any())).thenReturn(supplierDTO);
@@ -212,7 +212,7 @@ public class SupplierControllerTests {
     }
 
     @Test
-    @WithMockUser(authorities = "ROLE_CLIENT")
+    @WithMockUser(roles = "CLIENT")
     public void updateShouldReturn200WhenIdExists() throws Exception {
 
         Mockito.when(supplierService.update(eq(existingId), any())).thenReturn(supplierDTO);
@@ -228,7 +228,7 @@ public class SupplierControllerTests {
     }
 
     @Test
-    @WithMockUser(authorities = "ROLE_CLIENT")
+    @WithMockUser(roles = "CLIENT")
     public void updateShouldReturn404WhenIdDoesNotExist() throws Exception {
 
         Mockito.when(supplierService.update(eq(nonExistingId), any())).thenThrow(ResourceNotFoundException.class);
@@ -268,7 +268,7 @@ public class SupplierControllerTests {
     }
 
     @Test
-    @WithMockUser(authorities = "ROLE_CLIENT")
+    @WithMockUser(roles = "CLIENT")
     public void deleteShouldReturnNoContentWhenIdExists() throws Exception {
 
         Mockito.doNothing().when(supplierService).delete(existingId);
@@ -281,7 +281,7 @@ public class SupplierControllerTests {
     }
 
     @Test
-    @WithMockUser(authorities = "ROLE_CLIENT")
+    @WithMockUser(roles = "CLIENT")
     public void deleteShouldReturn404WhenIdDoesNotExist() throws Exception {
 
         Mockito.doThrow(ResourceNotFoundException.class).when(supplierService).delete(nonExistingId);
