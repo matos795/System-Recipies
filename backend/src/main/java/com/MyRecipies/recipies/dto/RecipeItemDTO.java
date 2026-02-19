@@ -1,5 +1,7 @@
 package com.MyRecipies.recipies.dto;
 
+import java.math.BigDecimal;
+
 import com.MyRecipies.recipies.entities.RecipeItem;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -10,7 +12,7 @@ public class RecipeItemDTO {
     private Long ingredientId;
     @NotNull
     @Positive
-    private Double quantity;
+    private BigDecimal quantity;
 
     public RecipeItemDTO() {
     }
@@ -37,11 +39,11 @@ public class RecipeItemDTO {
         this.ingredientId = ingredientId;
     }
 
-    public Double getQuantity() {
+    public BigDecimal getQuantity() {
         return quantity;
     }
 
-    public void setQuantity(Double quantity) {
+    public void setQuantity(BigDecimal quantity) {
         this.quantity = quantity;
     }
     

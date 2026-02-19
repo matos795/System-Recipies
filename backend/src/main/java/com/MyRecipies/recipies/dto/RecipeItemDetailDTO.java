@@ -1,5 +1,7 @@
 package com.MyRecipies.recipies.dto;
 
+import java.math.BigDecimal;
+
 import com.MyRecipies.recipies.entities.Ingredient;
 import com.MyRecipies.recipies.entities.Product;
 import com.MyRecipies.recipies.entities.RecipeItem;
@@ -17,9 +19,9 @@ private Long id;
     private UnitType unit; // un, g, ml…
 
     // Dados de custo
-    private Double unitCost;
-    private Double quantity;
-    private Double totalCost;
+    private BigDecimal unitCost;
+    private BigDecimal quantity;
+    private BigDecimal totalCost;
 
     public RecipeItemDetailDTO() {}
 
@@ -78,15 +80,15 @@ private Long id;
         return supplierName;
     }
 
-    public Double getUnitCost() {
+    public BigDecimal getUnitCost() {
         return unitCost;
     }
 
-    public Double getQuantity() {
+    public BigDecimal getQuantity() {
         return quantity;
     }
 
-    public Double getTotalCost() {
+    public BigDecimal getTotalCost() {
         return totalCost;
     }
     

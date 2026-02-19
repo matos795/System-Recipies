@@ -1,5 +1,6 @@
 package com.MyRecipies.recipies.entities;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -30,7 +31,7 @@ public class Ingredient {
     private String brand;
 
     @Column(name = "price_cost", nullable = false)
-    private Double priceCost;
+    private BigDecimal priceCost;
 
     private String imgUrl;
 
@@ -40,7 +41,7 @@ public class Ingredient {
     private LocalDateTime lastUpdateDate;
 
     @Column(name = "quantity_per_unit", nullable = false)
-    private Double quantityPerUnit;
+    private BigDecimal quantityPerUnit;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -57,8 +58,8 @@ public class Ingredient {
     public Ingredient() {
     }
 
-    public Ingredient(Long id, String name, String brand, Double priceCost, String imgUrl, LocalDate createDate,
-            LocalDateTime lastUpdateDate, Double quantityPerUnit, UnitType unit, Supplier supplier, User client) {
+    public Ingredient(Long id, String name, String brand, BigDecimal priceCost, String imgUrl, LocalDate createDate,
+            LocalDateTime lastUpdateDate, BigDecimal quantityPerUnit, UnitType unit, Supplier supplier, User client) {
         this.id = id;
         this.name = name;
         this.brand = brand;
@@ -96,11 +97,11 @@ public class Ingredient {
         this.brand = brand;
     }
 
-    public Double getPriceCost() {
+    public BigDecimal getPriceCost() {
         return priceCost;
     }
 
-    public void setPriceCost(Double priceCost) {
+    public void setPriceCost(BigDecimal priceCost) {
         this.priceCost = priceCost;
     }
 
@@ -128,11 +129,11 @@ public class Ingredient {
         this.lastUpdateDate = lastUpdateDate;
     }
 
-    public Double getQuantityPerUnit() {
+    public BigDecimal getQuantityPerUnit() {
         return quantityPerUnit;
     }
 
-    public void setQuantityPerUnit(Double quantityPerUnit) {
+    public void setQuantityPerUnit(BigDecimal quantityPerUnit) {
         this.quantityPerUnit = quantityPerUnit;
     }
 
@@ -152,27 +153,27 @@ public class Ingredient {
         this.supplier = supplier;
     }
 
-@PrePersist
-protected void onCreate() {
-    this.createDate = LocalDate.now();
-    this.lastUpdateDate = LocalDateTime.now(); 
-}
+    @PrePersist
+    protected void onCreate() {
+        this.createDate = LocalDate.now();
+        this.lastUpdateDate = LocalDateTime.now();
+    }
 
-@PreUpdate
-protected void onUpdate() {
-    this.lastUpdateDate = LocalDateTime.now();
-}
+    @PreUpdate
+    protected void onUpdate() {
+        this.lastUpdateDate = LocalDateTime.now();
+    }
 
-public User getClient() {
-    return client;
-}
+    public User getClient() {
+        return client;
+    }
 
-public void setClient(User client) {
-    this.client = client;
-}
+    public void setClient(User client) {
+        this.client = client;
+    }
 
-    public Double calculateUnitCost() {
-        return this.priceCost / this.quantityPerUnit;
+    public BigDecimal calculateUnitCost() {
+        return this.priceCost.divide(this.quantityPerUnit);
     }
 
 }

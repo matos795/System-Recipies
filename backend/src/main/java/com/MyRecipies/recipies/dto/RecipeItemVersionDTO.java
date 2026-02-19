@@ -1,24 +1,11 @@
-package com.MyRecipies.recipies.entities;
+package com.MyRecipies.recipies.dto;
 
 import java.math.BigDecimal;
 
+import com.MyRecipies.recipies.entities.RecipeItemVersion;
 import com.MyRecipies.recipies.entities.enums.UnitType;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-
-@Entity
-@Table(name = "recipe_item_versions")
-public class RecipeItemVersion {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class RecipeItemVersionDTO {
 
     private String ingredientName;
     private BigDecimal quantity;
@@ -26,19 +13,12 @@ public class RecipeItemVersion {
     private UnitType unit;
     private BigDecimal totalCostSnapshot;
 
-    @ManyToOne
-    @JoinColumn(name = "version_id")
-    private RecipeVersion version;
-
-    public RecipeItemVersion() {
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
+    public RecipeItemVersionDTO(RecipeItemVersion entity) {
+        ingredientName = entity.getIngredientName();
+        quantity = entity.getQuantity();
+        unitCostSnapshot = entity.getUnitCostSnapshot();
+        unit = entity.getUnit();
+        totalCostSnapshot = entity.getTotalCostSnapshot();
     }
 
     public String getIngredientName() {
@@ -81,13 +61,5 @@ public class RecipeItemVersion {
         this.totalCostSnapshot = totalCostSnapshot;
     }
 
-    public RecipeVersion getVersion() {
-        return version;
-    }
-
-    public void setVersion(RecipeVersion version) {
-        this.version = version;
-    }
-
-
+    
 }

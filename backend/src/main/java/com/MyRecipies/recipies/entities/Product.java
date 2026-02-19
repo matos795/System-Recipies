@@ -1,5 +1,6 @@
 package com.MyRecipies.recipies.entities;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -26,7 +27,7 @@ public class Product {
     private String name;
 
     @Column(nullable = false)
-    private Double price;
+    private BigDecimal price;
 
     private String imgUrl;
 
@@ -40,7 +41,7 @@ public class Product {
     public Product() {
     }
 
-    public Product(Long id, String name, Double price, String imgUrl, LocalDate createDate,
+    public Product(Long id, String name, BigDecimal price, String imgUrl, LocalDate createDate,
             LocalDateTime lastUpdateDate, Recipe recipe) {
         this.id = id;
         this.name = name;
@@ -67,11 +68,11 @@ public class Product {
         this.name = name;
     }
 
-    public Double getPrice() {
+    public BigDecimal getPrice() {
         return price;
     }
 
-    public void setPrice(Double price) {
+    public void setPrice(BigDecimal price) {
         this.price = price;
     }
 
@@ -108,23 +109,25 @@ public class Product {
     }
 
     @PrePersist
-protected void onCreate() {
-    this.createDate = LocalDate.now();
-    this.lastUpdateDate = LocalDateTime.now(); 
-}
+    protected void onCreate() {
+        this.createDate = LocalDate.now();
+        this.lastUpdateDate = LocalDateTime.now();
+    }
 
-@PreUpdate
-protected void onUpdate() {
-    this.lastUpdateDate = LocalDateTime.now();
-}
+    @PreUpdate
+    protected void onUpdate() {
+        this.lastUpdateDate = LocalDateTime.now();
+    }
 
-public Double calculateUnitCost() {
-    if (this.recipe == null) return 0.0; // produtos sem receita não têm custo calculado
+    public BigDecimal calculateUnitCost() {
+        if (this.recipe == null)
+            return BigDecimal.ZERO; // produtos sem receita não têm custo calculado
 
-    Double totalCost = this.recipe.calculateTotalCost();
-    if (this.recipe.getAmount() == 0) return 0.0;
+        BigDecimal totalCost = this.recipe.calculateTotalCost();
+        if (this.recipe.getAmount() == 0)
+            return BigDecimal.ZERO;
 
-    return totalCost / this.recipe.getAmount();
-}
-    
+        return totalCost.divide(BigDecimal.valueOf(this.recipe.getAmount()));
+    }
+
 }

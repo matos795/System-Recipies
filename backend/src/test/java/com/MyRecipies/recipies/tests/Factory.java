@@ -1,5 +1,6 @@
 package com.MyRecipies.recipies.tests;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -36,8 +37,8 @@ public class Factory {
         Ingredient ingredient = new Ingredient();
         ingredient.setName("Sugar");
         ingredient.setBrand("Test Brand");
-        ingredient.setPriceCost(10.0);
-        ingredient.setQuantityPerUnit(1.0);
+        ingredient.setPriceCost(BigDecimal.valueOf(10.0));
+        ingredient.setQuantityPerUnit(BigDecimal.valueOf(1.0));
         ingredient.setUnit(UnitType.KILOGRAM);
         ingredient.setClient(client);
         return ingredient;
@@ -48,7 +49,7 @@ public class Factory {
     public static Product createProduct() {
         Product product = new Product();
         product.setName("Cake");
-        product.setPrice(30.0);
+        product.setPrice(BigDecimal.valueOf(30.0));
         product.setCreateDate(LocalDate.now());
         product.setLastUpdateDate(LocalDateTime.now());
         return product;
@@ -87,7 +88,7 @@ public class Factory {
             RecipeItem item = new RecipeItem();
             item.setRecipe(recipe);
             item.setIngredient(ing);
-            item.setQuantity(1.0);
+            item.setQuantity(BigDecimal.valueOf(1.0));
             item.calculateSnapshot();
             items.add(item);
         }

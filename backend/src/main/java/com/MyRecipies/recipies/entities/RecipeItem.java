@@ -1,5 +1,7 @@
 package com.MyRecipies.recipies.entities;
 
+import java.math.BigDecimal;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -30,18 +32,18 @@ public class RecipeItem {
     private Ingredient ingredient;
 
     @Column(nullable = false)
-    private Double quantity;
+    private BigDecimal quantity;
 
     @Column(nullable = false)
-    private Double unitCostSnapshot;
+    private BigDecimal unitCostSnapshot;
 
     @Column(nullable = false)
-    private Double totalCostSnapshot;
+    private BigDecimal totalCostSnapshot;
     
     public RecipeItem() {
     }
 
-    public RecipeItem(Long id, Recipe recipe, Product subProduct, Ingredient ingredient, Double quantity) {
+    public RecipeItem(Long id, Recipe recipe, Product subProduct, Ingredient ingredient, BigDecimal quantity) {
         this.id = id;
         this.recipe = recipe;
         this.subProduct = subProduct;
@@ -81,16 +83,16 @@ public class RecipeItem {
         this.ingredient = ingredient;
     }
 
-    public Double getQuantity() {
+    public BigDecimal getQuantity() {
         return quantity;
     }
 
-    public void setQuantity(Double quantity) {
+    public void setQuantity(BigDecimal quantity) {
         this.quantity = quantity;
     }
 
     public void calculateSnapshot() {
-        Double unitCost = 0.0;
+        BigDecimal unitCost = BigDecimal.ZERO;
 
         if (ingredient != null) {
             unitCost = ingredient.calculateUnitCost();
@@ -99,14 +101,14 @@ public class RecipeItem {
         }
 
         this.unitCostSnapshot = unitCost;
-        this.totalCostSnapshot = unitCost * quantity;
+        this.totalCostSnapshot = unitCost.multiply(quantity);
     }
 
-    public Double getUnitCost() {
+    public BigDecimal getUnitCost() {
         return unitCostSnapshot;
     }
 
-    public Double getTotalCost() {
+    public BigDecimal getTotalCost() {
         return totalCostSnapshot;
     }
 

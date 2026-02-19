@@ -1,5 +1,6 @@
 package com.MyRecipies.recipies.entities;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,9 +40,8 @@ public class Recipe {
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RecipeItem> items = new ArrayList<>();
 
-    @OneToMany(mappedBy = "recipe")
+    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RecipeVersion> versions = new ArrayList<>();
-
 
     public Recipe() {
     }
@@ -135,30 +135,30 @@ protected void onUpdate() {
     this.lastUpdateDate = LocalDateTime.now();
 }
 
-public Double calculateTotalCost() {
+public BigDecimal calculateTotalCost() {
     return items.stream()
-            .mapToDouble(RecipeItem::getTotalCost)
-            .sum();
+            .map(RecipeItem::getTotalCost)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
 }
 
-public Double calculateUnitCost() {
-    if (amount == 0) return 0.0;
-    return calculateTotalCost() / amount;
+public BigDecimal calculateUnitCost() {
+    if (amount == 0) return BigDecimal.ZERO;
+    return calculateTotalCost().divide(BigDecimal.valueOf(amount));
 }
 
-public Double calculateUnitProfit() {
-    return product.getPrice() - calculateUnitCost();
+public BigDecimal calculateUnitProfit() {
+    return product.getPrice().subtract(calculateUnitCost());
 }
 
-public Double calculateTotalProfit() {
-    return calculateUnitProfit() * amount;
+public BigDecimal calculateTotalProfit() {
+    return calculateUnitProfit().multiply(BigDecimal.valueOf(amount));
 }
 
-public Double calculateProfitPercentage() {
-    Double unitCost = calculateUnitCost();
-    if (unitCost == 0) return 0.0;
+public BigDecimal calculateProfitPercentage() {
+    BigDecimal unitCost = calculateUnitCost();
+    if (unitCost.compareTo(BigDecimal.ZERO) == 0) return BigDecimal.ZERO;
 
-    return (calculateUnitProfit() / unitCost) * 100.0;
+    return calculateUnitProfit().divide(unitCost).multiply(BigDecimal.valueOf(100));
 }
 
     public List<RecipeVersion> getVersions() {

@@ -1,43 +1,45 @@
-package com.MyRecipies.recipies.entities;
+package com.MyRecipies.recipies.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
+import com.MyRecipies.recipies.entities.RecipeItemVersion;
+import com.MyRecipies.recipies.entities.RecipeVersion;
 
-@Entity
-public class RecipeVersion {
+public class RecipeVersionDTO {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private Integer versionNumber;
     private LocalDateTime createdAt;
-
     private String description;
     private Integer amount;
-
     private String productNameSnapshot;
     private BigDecimal productPriceSnapshot;
+    private BigDecimal totalCost;
+    private BigDecimal profit;
+    private BigDecimal margin;
 
-    @ManyToOne
-    @JoinColumn(name = "recipe_product_id", nullable = false)
-    private Recipe recipe;
+    private List<RecipeItemVersionDTO> items = new ArrayList<>();
 
-    @OneToMany(mappedBy = "version", cascade = CascadeType.ALL)
-    private List<RecipeItemVersion> items = new ArrayList<>();
+    public RecipeVersionDTO() {
+    }
 
-    public RecipeVersion() {
+    public RecipeVersionDTO(RecipeVersion entity) {
+        id = entity.getId();
+        versionNumber = entity.getVersionNumber();
+        createdAt = entity.getCreatedAt();
+        description = entity.getDescription();
+        amount = entity.getAmount();
+        productNameSnapshot = entity.getProductNameSnapshot();
+        productPriceSnapshot = entity.getProductPriceSnapshot();
+
+        if (entity.getItems() != null) {
+            for (RecipeItemVersion item : entity.getItems()) {
+                items.add(new RecipeItemVersionDTO(item));
+            }
+        }
     }
 
     public Long getId() {
@@ -96,21 +98,35 @@ public class RecipeVersion {
         this.productPriceSnapshot = productPriceSnapshot;
     }
 
-    public Recipe getRecipe() {
-        return recipe;
-    }
-
-    public void setRecipe(Recipe recipe) {
-        this.recipe = recipe;
-    }
-
-    public List<RecipeItemVersion> getItems() {
+    public List<RecipeItemVersionDTO> getItems() {
         return items;
     }
 
-    public void setItems(List<RecipeItemVersion> items) {
+    public void setItems(List<RecipeItemVersionDTO> items) {
         this.items = items;
     }
 
-}
+    public BigDecimal getTotalCost() {
+        return totalCost;
+    }
 
+    public void setTotalCost(BigDecimal totalCost) {
+        this.totalCost = totalCost;
+    }
+
+    public BigDecimal getProfit() {
+        return profit;
+    }
+
+    public void setProfit(BigDecimal profit) {
+        this.profit = profit;
+    }
+
+    public BigDecimal getMargin() {
+        return margin;
+    }
+
+    public void setMargin(BigDecimal margin) {
+        this.margin = margin;
+    }
+}

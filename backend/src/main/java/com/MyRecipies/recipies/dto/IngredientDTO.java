@@ -1,5 +1,6 @@
 package com.MyRecipies.recipies.dto;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -16,14 +17,14 @@ public class IngredientDTO {
     private String brand;
 
     @NotNull
-    private Double priceCost;
+    private BigDecimal priceCost;
 
     private String imgUrl;
     private LocalDate createDate;
     private LocalDateTime lastUpdateDate;
 
     @NotNull
-    private Double quantityPerUnit;
+    private BigDecimal quantityPerUnit;
 
     @NotNull
     private UnitType unit;
@@ -34,8 +35,8 @@ public class IngredientDTO {
     public IngredientDTO() {
     }
 
-    public IngredientDTO(Long id, String name, String brand, Double priceCost, String imgUrl, LocalDate createDate,
-            LocalDateTime lastUpdateDate, Double quantityPerUnit, UnitType unit, Long supplierId) {
+    public IngredientDTO(Long id, String name, String brand, BigDecimal priceCost, String imgUrl, LocalDate createDate,
+            LocalDateTime lastUpdateDate, BigDecimal quantityPerUnit, UnitType unit, Long supplierId) {
         this.id = id;
         this.name = name;
         this.brand = brand;
@@ -90,11 +91,11 @@ public class IngredientDTO {
         this.brand = brand;
     }
 
-    public Double getPriceCost() {
+    public BigDecimal getPriceCost() {
         return priceCost;
     }
 
-    public void setPriceCost(Double priceCost) {
+    public void setPriceCost(BigDecimal priceCost) {
         this.priceCost = priceCost;
     }
 
@@ -126,11 +127,11 @@ public class IngredientDTO {
         this.lastUpdateDate = lastUpdateDate;
     }
 
-    public Double getQuantityPerUnit() {
+    public BigDecimal getQuantityPerUnit() {
         return quantityPerUnit;
     }
 
-    public void setQuantityPerUnit(Double quantityPerUnit) {
+    public void setQuantityPerUnit(BigDecimal quantityPerUnit) {
         this.quantityPerUnit = quantityPerUnit;
     }
 

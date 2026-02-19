@@ -1,5 +1,6 @@
 package com.MyRecipies.recipies.dto;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -19,13 +20,18 @@ public class RecipeDTO {
     private String productName;
 
     @NotNull
-    private Double productPrice;
+    private BigDecimal productPrice;
     private String imgUrl;
 
     private String description;
     private Integer amount;
     private LocalDate createDate;
     private LocalDateTime lastUpdateDate;
+
+    private BigDecimal totalCost;
+    private BigDecimal costPerUnit;
+    private BigDecimal profit;
+    private BigDecimal margin;
 
     // Itens da receita
     private List<RecipeItemDTO> items = new ArrayList<>();
@@ -36,7 +42,7 @@ public class RecipeDTO {
 
     }
 
-    public RecipeDTO(String productName, Double productPrice, String imgUrl, Long id, String description,
+    public RecipeDTO(String productName, BigDecimal productPrice, String imgUrl, Long id, String description,
             Integer amount, LocalDate createDate, LocalDateTime lastUpdateDate, List<RecipeItemDTO> items) {
         this.productName = productName;
         this.productPrice = productPrice;
@@ -70,11 +76,11 @@ public class RecipeDTO {
         this.productName = productName;
     }
 
-    public Double getProductPrice() {
+    public BigDecimal getProductPrice() {
         return productPrice;
     }
 
-    public void setProductPrice(Double productPrice) {
+    public void setProductPrice(BigDecimal productPrice) {
         this.productPrice = productPrice;
     }
 
@@ -141,5 +147,39 @@ public class RecipeDTO {
     public void setClient(ClientDTO client) {
         this.client = client;
     }
+
+    public BigDecimal getTotalCost() {
+        return totalCost;
+    }
+
+    public void setTotalCost(BigDecimal totalCost) {
+        this.totalCost = totalCost;
+    }
+
+    public BigDecimal getCostPerUnit() {
+        return costPerUnit;
+    }
+
+    public void setCostPerUnit(BigDecimal costPerUnit) {
+        this.costPerUnit = costPerUnit;
+    }
+
+    public BigDecimal getProfit() {
+        return profit;
+    }
+
+    public void setProfit(BigDecimal profit) {
+        this.profit = profit;
+    }
+
+    public BigDecimal getMargin() {
+        return margin;
+    }
+
+    public void setMargin(BigDecimal margin) {
+        this.margin = margin;
+    }
+
     
+
 }

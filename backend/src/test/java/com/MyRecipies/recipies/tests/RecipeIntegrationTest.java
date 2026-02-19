@@ -1,5 +1,6 @@
 package com.MyRecipies.recipies.tests;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 
 import org.junit.jupiter.api.Assertions;
@@ -49,19 +50,19 @@ public class RecipeIntegrationTest {
 
     RecipeDTO dto = new RecipeDTO();
     dto.setProductName("Bolo");
-    dto.setProductPrice(10.0);
+    dto.setProductPrice(BigDecimal.valueOf(10.0));
     dto.setItems(new ArrayList<>());
 
     RecipeDTO result = recipeService.insert(dto);
 
     Assertions.assertNotNull(result.getId());
     Assertions.assertEquals("Bolo", result.getProductName());
-    Assertions.assertEquals(10.0, result.getProductPrice());
+    Assertions.assertEquals(BigDecimal.valueOf(10.0), result.getProductPrice());
 
     Recipe recipe = recipeRepository.findById(result.getId()).orElseThrow();
 
     Assertions.assertEquals("Bolo", recipe.getProduct().getName());
-    Assertions.assertEquals(10.0, recipe.getProduct().getPrice());
+    Assertions.assertEquals(BigDecimal.valueOf(10.0), recipe.getProduct().getPrice());
     Assertions.assertEquals(user.getId(), recipe.getClient().getId());
 
 }
