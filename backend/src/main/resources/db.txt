@@ -116,12 +116,16 @@ CREATE TABLE ingredients (
 -- ==========================================================
 -- 🍰 TABELA RECIPE_ITEMS
 -- ==========================================================
+
 CREATE TABLE recipe_items (
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     recipe_id BIGINT NOT NULL,
     sub_product_id BIGINT,
     ingredient_id BIGINT,
     quantity NUMERIC(10,2) NOT NULL,
+
+    unit_cost_snapshot NUMERIC(10,2) NOT NULL,
+    total_cost_snapshot NUMERIC(10,2) NOT NULL,
 
     CONSTRAINT fk_recipe_items_recipe FOREIGN KEY (recipe_id)
         REFERENCES recipes(product_id)
@@ -139,3 +143,39 @@ CREATE TABLE recipe_items (
     )
 );
 
+-- ==========================================================
+-- 📜 TABELA RECIPE_VERSION
+-- ==========================================================
+CREATE TABLE recipe_version (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    version_number INT NOT NULL,
+    created_at TIMESTAMP NOT NULL,
+    description VARCHAR(255),
+    amount INT,
+    product_name_snapshot VARCHAR(255),
+    product_price_snapshot NUMERIC(10,2),
+    recipe_id BIGINT,
+
+    CONSTRAINT fk_recipe_version_recipe
+        FOREIGN KEY (recipe_id)
+        REFERENCES recipes(product_id)
+        ON DELETE CASCADE
+);
+
+-- ==========================================================
+-- 📜 TABELA RECIPE_ITEM_VERSION
+-- ==========================================================
+CREATE TABLE recipe_item_versions (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    ingredient_name VARCHAR(255),
+    quantity NUMERIC(10,2),
+    unit VARCHAR(20),
+    unit_cost_snapshot NUMERIC(10,2),
+    total_cost_snapshot NUMERIC(10,2),
+    version_id BIGINT,
+
+    CONSTRAINT fk_item_version_version
+        FOREIGN KEY (version_id)
+        REFERENCES recipe_version(id)
+        ON DELETE CASCADE
+);

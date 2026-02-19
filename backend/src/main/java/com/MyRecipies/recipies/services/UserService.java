@@ -64,7 +64,7 @@ public class UserService implements UserDetailsService{
         return new UserDTO(user);
     }
 
-    protected User authenticated(){
+    public User authenticated(){
 
         try{
 

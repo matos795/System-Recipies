@@ -18,9 +18,12 @@ import com.MyRecipies.recipies.entities.Ingredient;
 import com.MyRecipies.recipies.entities.Product;
 import com.MyRecipies.recipies.entities.Recipe;
 import com.MyRecipies.recipies.entities.RecipeItem;
+import com.MyRecipies.recipies.entities.RecipeItemVersion;
+import com.MyRecipies.recipies.entities.RecipeVersion;
 import com.MyRecipies.recipies.repositories.IngredientRepository;
 import com.MyRecipies.recipies.repositories.ProductRepository;
 import com.MyRecipies.recipies.repositories.RecipeRepository;
+import com.MyRecipies.recipies.repositories.RecipeVersionRepository;
 import com.MyRecipies.recipies.services.exceptions.DatabaseException;
 import com.MyRecipies.recipies.services.exceptions.ResourceNotFoundException;
 
@@ -37,6 +40,9 @@ public class RecipeService {
 
     @Autowired
     private ProductRepository productRepository;
+
+    @Autowired
+    private RecipeVersionRepository versionRepository;
 
     @Autowired
     private UserService userService;
@@ -79,6 +85,9 @@ public RecipeDTO update(Long id, RecipeDTO dto){
 
         Recipe entity = recipeRepository.getReferenceById(id);
         authService.validateSelfOrAdmin(entity.getClient().getId());
+
+        createVersion(entity);
+        
         dtoToEntity(entity, dto);
         entity = recipeRepository.save(entity);
         return new RecipeDTO(entity);
@@ -142,22 +151,63 @@ private void dtoToEntity(Recipe entity, RecipeDTO dto){
     }
 
     for (RecipeItemDTO itemDTO : dto.getItems()) {
+
         RecipeItem item = new RecipeItem();
         item.setRecipe(entity);
-        item.setQuantity(itemDTO.getQuantity());
 
         if (itemDTO.getIngredientId() != null) {
-            Ingredient ing = ingredientRepository.findById(itemDTO.getIngredientId()).orElseThrow(() -> new ResourceNotFoundException("Ingrediente não encontrado!"));
-                authService.validateSelfOrAdmin(ing.getClient().getId());
-                    item.setIngredient(ing);
-        } else if(itemDTO.getSubProductId() != null) {
-            Product sub = productRepository.findById(itemDTO.getSubProductId()).orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado!"));
-                authService.validateSelfOrAdmin(sub.getRecipe().getClient().getId());
-                    item.setSubProduct(sub);
+            Ingredient ing = ingredientRepository.findById(itemDTO.getIngredientId())
+                .orElseThrow(() -> new ResourceNotFoundException("Ingrediente não encontrado!"));
+            authService.validateSelfOrAdmin(ing.getClient().getId());
+            item.setIngredient(ing);
+        } 
+        else if (itemDTO.getSubProductId() != null) {
+            Product sub = productRepository.findById(itemDTO.getSubProductId())
+                .orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado!"));
+            authService.validateSelfOrAdmin(sub.getRecipe().getClient().getId());
+            item.setSubProduct(sub);
         }
+
+        item.setQuantity(itemDTO.getQuantity());
+
+        item.calculateSnapshot();
 
         entity.addItem(item);
     }
 }
+
+    private void createVersion(Recipe recipe) {
+
+        RecipeVersion version = new RecipeVersion();
+        version.setRecipe(recipe);
+        version.setCreatedAt(LocalDateTime.now());
+        version.setDescription(recipe.getDescription());
+        version.setAmount(recipe.getAmount());
+        version.setProductNameSnapshot(recipe.getProduct().getName());
+        version.setProductPriceSnapshot(recipe.getProduct().getPrice());
+
+        // Número da versão
+        int nextVersion = recipe.getVersions() == null ? 1 : recipe.getVersions().size() + 1;
+        version.setVersionNumber(nextVersion);
+
+        for (RecipeItem item : recipe.getItems()) {
+
+            RecipeItemVersion itemVersion = new RecipeItemVersion();
+            itemVersion.setVersion(version);
+            itemVersion.setIngredientName(
+                item.getIngredient() != null
+                    ? item.getIngredient().getName()
+                    : item.getSubProduct().getName()
+            );
+            itemVersion.setQuantity(item.getQuantity());
+            itemVersion.setUnitCostSnapshot(item.getUnitCost());
+            itemVersion.setTotalCostSnapshot(item.getTotalCost());
+
+            version.getItems().add(itemVersion);
+        }
+
+        versionRepository.save(version);
+    }
+
 
 }

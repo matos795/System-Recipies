@@ -2,6 +2,7 @@ package com.MyRecipies.recipies.dto;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,7 +28,7 @@ public class RecipeDTO {
     private LocalDateTime lastUpdateDate;
 
     // Itens da receita
-    private List<RecipeItemDTO> items;
+    private List<RecipeItemDTO> items = new ArrayList<>();
 
     private ClientDTO client;
 

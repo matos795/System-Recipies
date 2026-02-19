@@ -39,6 +39,10 @@ public class Recipe {
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RecipeItem> items = new ArrayList<>();
 
+    @OneToMany(mappedBy = "recipe")
+    private List<RecipeVersion> versions = new ArrayList<>();
+
+
     public Recipe() {
     }
 
@@ -157,5 +161,12 @@ public Double calculateProfitPercentage() {
     return (calculateUnitProfit() / unitCost) * 100.0;
 }
 
+    public List<RecipeVersion> getVersions() {
+        return versions;
+    }
+
+    public void setVersions(List<RecipeVersion> versions) {
+        this.versions = versions;
+    }
 
 }

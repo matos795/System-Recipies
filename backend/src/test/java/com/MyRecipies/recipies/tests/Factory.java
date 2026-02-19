@@ -88,6 +88,7 @@ public class Factory {
             item.setRecipe(recipe);
             item.setIngredient(ing);
             item.setQuantity(1.0);
+            item.calculateSnapshot();
             items.add(item);
         }
 

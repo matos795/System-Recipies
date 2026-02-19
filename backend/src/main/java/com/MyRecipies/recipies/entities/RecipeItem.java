@@ -28,8 +28,15 @@ public class RecipeItem {
     @ManyToOne
     @JoinColumn(name = "ingredient_id")
     private Ingredient ingredient;
+
     @Column(nullable = false)
     private Double quantity;
+
+    @Column(nullable = false)
+    private Double unitCostSnapshot;
+
+    @Column(nullable = false)
+    private Double totalCostSnapshot;
     
     public RecipeItem() {
     }
@@ -82,18 +89,25 @@ public class RecipeItem {
         this.quantity = quantity;
     }
 
-    public Double getUnitCost() {
-    if (ingredient != null) {
-        return ingredient.calculateUnitCost();
-    }
-    if (subProduct != null) {
-        return subProduct.calculateUnitCost();
-    }
-    return 0.0;
-}
+    public void calculateSnapshot() {
+        Double unitCost = 0.0;
 
-public Double getTotalCost() {
-    return getUnitCost() * quantity;
-}
+        if (ingredient != null) {
+            unitCost = ingredient.calculateUnitCost();
+        } else if (subProduct != null) {
+            unitCost = subProduct.calculateUnitCost();
+        }
+
+        this.unitCostSnapshot = unitCost;
+        this.totalCostSnapshot = unitCost * quantity;
+    }
+
+    public Double getUnitCost() {
+        return unitCostSnapshot;
+    }
+
+    public Double getTotalCost() {
+        return totalCostSnapshot;
+    }
 
 }

@@ -1,5 +1,7 @@
 package com.MyRecipies.recipies.services;
 
+import static org.mockito.ArgumentMatchers.any;
+
 import java.util.ArrayList;
 import java.util.Optional;
 
@@ -18,10 +20,12 @@ import org.springframework.data.domain.Pageable;
 
 import com.MyRecipies.recipies.dto.RecipeDTO;
 import com.MyRecipies.recipies.entities.Recipe;
+import com.MyRecipies.recipies.entities.RecipeVersion;
 import com.MyRecipies.recipies.entities.User;
 import com.MyRecipies.recipies.repositories.IngredientRepository;
 import com.MyRecipies.recipies.repositories.ProductRepository;
 import com.MyRecipies.recipies.repositories.RecipeRepository;
+import com.MyRecipies.recipies.repositories.RecipeVersionRepository;
 import com.MyRecipies.recipies.services.exceptions.DatabaseException;
 import com.MyRecipies.recipies.services.exceptions.ResourceNotFoundException;
 import com.MyRecipies.recipies.tests.Factory;
@@ -42,6 +46,9 @@ public class RecipeServiceTests {
 
     @Mock
     private ProductRepository productRepository;
+
+    @Mock
+    private RecipeVersionRepository versionRepository;
 
     @Mock
     private UserService userService;
@@ -75,12 +82,14 @@ public class RecipeServiceTests {
 
         dto = new RecipeDTO();
         dto.setItems(new ArrayList<>());
+        dto.setProductName("aaaa");
 
         client = new User();
         client.setId(clientId);
 
         recipe = new Recipe();
         recipe.setProduct(Factory.createProduct());
+        recipe.getProduct().setId(existingId);
         recipe.setId(existingId);
         recipe.setClient(client);
     }
@@ -223,10 +232,20 @@ public class RecipeServiceTests {
     @Test
     public void updateShouldReturnRecipeDTOWhenIdExistsAndAuthorized() {
 
-        Mockito.when(recipeRepository.getReferenceById(existingId)).thenReturn(recipe);
-        Mockito.doNothing().when(authService).validateSelfOrAdmin(clientId);
-        Mockito.when(productRepository.save(Mockito.any())).thenAnswer(invocation -> invocation.getArgument(0));
-        Mockito.when(recipeRepository.save(Mockito.any())).thenReturn(recipe);
+        Mockito.when(recipeRepository.getReferenceById(existingId))
+            .thenReturn(recipe);
+
+        Mockito.doNothing().when(authService)
+            .validateSelfOrAdmin(clientId);
+
+        Mockito.when(productRepository.getReferenceById(existingId))
+            .thenReturn(recipe.getProduct());
+
+        Mockito.when(productRepository.save(Mockito.any()))
+            .thenAnswer(invocation -> invocation.getArgument(0));
+
+        Mockito.when(recipeRepository.save(Mockito.any()))
+            .thenReturn(recipe);
 
         RecipeDTO result = recipeService.update(existingId, dto);
 
@@ -265,4 +284,28 @@ public class RecipeServiceTests {
         Mockito.verify(authService).validateSelfOrAdmin(clientId);
         Mockito.verify(recipeRepository, Mockito.never()).save(Mockito.any());
     }
+
+    @Test
+    public void updateShouldCreateNewVersion() {
+
+        Mockito.when(recipeRepository.getReferenceById(existingId))
+            .thenReturn(recipe);
+
+        Mockito.doNothing().when(authService)
+            .validateSelfOrAdmin(clientId);
+
+        Mockito.when(productRepository.getReferenceById(existingId))
+            .thenReturn(recipe.getProduct());
+
+        Mockito.when(productRepository.save(any()))
+            .thenAnswer(invocation -> invocation.getArgument(0));
+
+        Mockito.when(recipeRepository.save(any()))
+            .thenReturn(recipe);
+
+        recipeService.update(existingId, dto);
+
+        Mockito.verify(versionRepository).save(any(RecipeVersion.class));
+    }
+
 }

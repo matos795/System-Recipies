@@ -52,17 +52,3 @@ INSERT INTO ingredients (name, brand, price_cost, img_url, create_date, last_upd
 INSERT INTO ingredients (name, brand, price_cost, img_url, create_date, last_update_date, quantity_per_unit, unit, supplier_id, client_id) VALUES ('Ovos', 'Granja Sol', 0.70, NULL, CURRENT_DATE, CURRENT_TIMESTAMP, 12, 'UNIT', 2, 1);
 INSERT INTO ingredients (name, brand, price_cost, img_url, create_date, last_update_date, quantity_per_unit, unit, supplier_id, client_id) VALUES ('Limão Tahiti', 'Natural', 0.50, NULL, CURRENT_DATE, CURRENT_TIMESTAMP, 1, 'UNIT', 2, 1);
 
-
--- ==========================================================
--- 🍰 RECIPE_ITEMS
--- ==========================================================
-
--- Bolo
-INSERT INTO recipe_items (recipe_id, ingredient_id, sub_product_id, quantity) VALUES (1, 1, NULL, 0.5);
-INSERT INTO recipe_items (recipe_id, ingredient_id, sub_product_id, quantity) VALUES (1, 2, NULL, 0.3);
-INSERT INTO recipe_items (recipe_id, ingredient_id, sub_product_id, quantity) VALUES (1, 3, NULL, 4);
-
--- Torta
-INSERT INTO recipe_items (recipe_id, ingredient_id, sub_product_id, quantity) VALUES (2, 2, NULL, 0.2);
-INSERT INTO recipe_items (recipe_id, ingredient_id, sub_product_id, quantity) VALUES (2, 3, NULL, 3);
-INSERT INTO recipe_items (recipe_id, ingredient_id, sub_product_id, quantity) VALUES (2, 4, NULL, 4);
