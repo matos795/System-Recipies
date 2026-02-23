@@ -1,7 +1,11 @@
 package com.MyRecipies.recipies.tests;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -12,8 +16,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import com.MyRecipies.recipies.dto.RecipeDTO;
+import com.MyRecipies.recipies.dto.RecipeItemDTO;
+import com.MyRecipies.recipies.dto.RecipeVersionDTO;
+import com.MyRecipies.recipies.entities.Ingredient;
 import com.MyRecipies.recipies.entities.Recipe;
 import com.MyRecipies.recipies.entities.User;
+import com.MyRecipies.recipies.entities.enums.UnitType;
+import com.MyRecipies.recipies.repositories.IngredientRepository;
 import com.MyRecipies.recipies.repositories.RecipeRepository;
 import com.MyRecipies.recipies.repositories.UserRepository;
 import com.MyRecipies.recipies.services.RecipeService;
@@ -34,6 +43,9 @@ public class RecipeIntegrationTest {
 
     @Autowired
     private RecipeRepository recipeRepository;
+
+    @Autowired
+    private IngredientRepository ingredientRepository;
 
     @MockitoBean
     private UserService userService;
@@ -66,6 +78,86 @@ public class RecipeIntegrationTest {
     Assertions.assertEquals(user.getId(), recipe.getClient().getId());
 
 }
+
+@Test
+    public void shouldInsertUpdateAndCreateVersionCorrectly() {
+
+        // ========================
+        // 1️⃣ Criar usuário real
+        // ========================
+        User user = new User();
+        user.setName("Teste");
+        user.setEmail("teste@email.com");
+        user.setPassword("123");
+        user = userRepository.save(user);
+
+        Mockito.when(userService.authenticated()).thenReturn(user);
+
+        // ========================
+        // 2️⃣ Criar ingrediente real
+        // ========================
+        Ingredient ingredient = new Ingredient();
+        ingredient.setName("Farinha");
+        ingredient.setPriceCost(new BigDecimal("10"));
+        ingredient.setQuantityPerUnit(new BigDecimal("1"));
+        ingredient.setUnit(UnitType.KILOGRAM);
+        ingredient.setClient(user);
+
+        ingredient = ingredientRepository.save(ingredient);
+
+        // ========================
+        // 3️⃣ Criar DTO para insert
+        // ========================
+        RecipeDTO dto = new RecipeDTO();
+        dto.setDescription("Receita Original");
+        dto.setAmount(1);
+        dto.setProductName("Bolo");
+        dto.setProductPrice(new BigDecimal("50"));
+
+        RecipeItemDTO itemDTO = new RecipeItemDTO();
+        itemDTO.setIngredientId(ingredient.getId());
+        itemDTO.setQuantity(new BigDecimal("1"));
+
+        dto.setItems(List.of(itemDTO));
+
+        // ========================
+        // 4️⃣ Insert
+        // ========================
+        RecipeDTO inserted = recipeService.insert(dto);
+
+        assertNotNull(inserted.getId());
+        assertEquals(0, inserted.getTotalCost().compareTo(new BigDecimal("10")));
+        assertEquals(0, inserted.getProfit().compareTo(new BigDecimal("40")));
+
+        // ========================
+        // 5️⃣ Update (novo preço)
+        // ========================
+        dto.setProductPrice(new BigDecimal("100"));
+
+        RecipeDTO updated = recipeService.update(inserted.getId(), dto);
+
+        assertEquals(0, updated.getProfit().compareTo(new BigDecimal("90")));
+
+        // ========================
+        // 6️⃣ Buscar versões
+        // ========================
+        List<RecipeVersionDTO> versions = recipeService.findVersions(inserted.getId());
+
+        assertEquals(2, versions.size());
+
+        RecipeVersionDTO firstVersion = versions.get(1); // versão antiga
+
+        assertEquals("Receita Original", firstVersion.getDescription());
+        assertEquals(0,
+                firstVersion.getProductPriceSnapshot()
+                        .compareTo(new BigDecimal("50")));
+
+        assertEquals(1, firstVersion.getItems().size());
+        assertEquals(0,
+                firstVersion.getItems().get(0)
+                        .getTotalCostSnapshot()
+                        .compareTo(new BigDecimal("10")));
+    }
 
 }
 

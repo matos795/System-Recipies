@@ -11,6 +11,8 @@ import com.MyRecipies.recipies.entities.Ingredient;
 import com.MyRecipies.recipies.entities.Product;
 import com.MyRecipies.recipies.entities.Recipe;
 import com.MyRecipies.recipies.entities.RecipeItem;
+import com.MyRecipies.recipies.entities.RecipeItemVersion;
+import com.MyRecipies.recipies.entities.RecipeVersion;
 import com.MyRecipies.recipies.entities.Supplier;
 import com.MyRecipies.recipies.entities.User;
 import com.MyRecipies.recipies.entities.enums.UnitType;
@@ -78,8 +80,7 @@ public class Factory {
 
     public static Recipe createRecipeWithIngredients(
             User client,
-            List<Ingredient> ingredients
-    ) {
+            List<Ingredient> ingredients) {
         Recipe recipe = createRecipe(client);
 
         List<RecipeItem> items = new ArrayList<>();
@@ -109,7 +110,32 @@ public class Factory {
         return supplier;
     }
 
-    /* ===================== XXXXXXX ===================== */
+    /* ===================== RECIPE VERSIONS ===================== */
+
+    public static RecipeVersion createRecipeVersion(Recipe recipe, int number) {
+        RecipeVersion version = new RecipeVersion();
+        version.setRecipe(recipe);
+        version.setVersionNumber(number);
+        version.setCreatedAt(LocalDateTime.now());
+        version.setDescription("Teste");
+        version.setAmount(1);
+        version.setProductNameSnapshot("Produto");
+        version.setProductPriceSnapshot(BigDecimal.TEN);
+        return version;
+    }
+
+    /* ===================== RECIPE ITEMS VERSIONS ===================== */
+
+    public static RecipeItemVersion createRecipeItemVersion(RecipeVersion version) {
+    RecipeItemVersion item = new RecipeItemVersion();
+    item.setVersion(version);
+    item.setIngredientName("Ingrediente");
+    item.setQuantity(BigDecimal.ONE);
+    item.setUnitCostSnapshot(BigDecimal.ONE);
+    item.setTotalCostSnapshot(BigDecimal.ONE);
+    item.setUnit(UnitType.UNIT);
+    return item;
+}
 
 
 }

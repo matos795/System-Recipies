@@ -183,7 +183,6 @@ public class RecipeControllerTests {
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.id").value(existingId));
-;
 
         Mockito.verify(recipeService).insert(any());
     }
@@ -309,6 +308,117 @@ public class RecipeControllerTests {
 
         mockMvc.perform(delete("/recipes/{id}", existingId)
         .with(csrf()))
+        .andExpect(status().isForbidden());
+
+        Mockito.verifyNoInteractions(recipeService);
+    }
+
+    @Test
+    @WithMockUser(roles = "CLIENT")
+    public void findVersionsShouldReturnListOfVersionsWhenIdExists() throws Exception {
+
+        mockMvc.perform(get("/recipes/{id}/versions", existingId)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+
+        Mockito.verify(recipeService).findVersions(existingId);
+    }
+
+    @Test
+    @WithMockUser(roles = "CLIENT")
+    public void findVersionsShouldReturn404WhenIdDoesNotExist() throws Exception {
+
+        Mockito.when(recipeService.findVersions(nonExistingId)).thenThrow(ResourceNotFoundException.class);
+
+        mockMvc.perform(get("/recipes/{id}/versions", nonExistingId)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound());
+
+        Mockito.verify(recipeService).findVersions(nonExistingId);
+    }
+
+    @Test
+    public void findVersionsShouldReturn401WhenNotAuthenticated() throws Exception {
+
+        mockMvc.perform(get("/recipes/{id}/versions", existingId)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isUnauthorized());
+
+        Mockito.verifyNoInteractions(recipeService);
+    }
+
+    @Test
+    @WithMockUser(roles = "OTHER")
+    public void findVersionsShouldReturn403WhenUserHasWrongRole() throws Exception {
+
+        mockMvc.perform(get("/recipes/{id}/versions", existingId)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isForbidden());
+
+        Mockito.verifyNoInteractions(recipeService);
+    }
+
+    @Test
+    @WithMockUser(roles = "CLIENT")
+    public void findVersionsShouldReturnEmptyListWhenRecipeHasNoVersions() throws Exception {
+        Mockito.when(recipeService.findVersions(existingId)).thenReturn(List.of());
+
+        mockMvc.perform(get("/recipes/{id}/versions", existingId)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$").isEmpty());
+
+        Mockito.verify(recipeService).findVersions(existingId);
+    }
+
+    @Test
+    @WithMockUser(roles = "CLIENT")
+    public void findVersionsByIdShouldReturnVersionWhenExists() throws Exception {
+
+        Long versionId = 1L;
+
+        mockMvc.perform(get("/recipes/{id}/versions/{versionId}", existingId, versionId)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+
+        Mockito.verify(recipeService).findVersionById(existingId, versionId);
+    }
+
+    @Test
+    @WithMockUser(roles = "CLIENT")
+    public void findVersionsByIdShouldReturn404WhenVersionDoesNotExist() throws Exception {
+
+        Long versionId = 1000L;
+
+        Mockito.when(recipeService.findVersionById(existingId, versionId)).thenThrow(ResourceNotFoundException.class);
+
+        mockMvc.perform(get("/recipes/{id}/versions/{versionId}", existingId, versionId)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound());
+
+        Mockito.verify(recipeService).findVersionById(existingId, versionId);
+}
+
+    @Test
+    public void findVersionsByIdShouldReturn401WhenNotAuthenticated() throws Exception {
+
+        Long versionId = 1L;
+
+        mockMvc.perform(get("/recipes/{id}/versions/{versionId}", existingId, versionId)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isUnauthorized());
+
+        Mockito.verifyNoInteractions(recipeService);
+    }
+
+    @Test
+    @WithMockUser(roles = "OTHER")
+    public void findVersionsByIdShouldReturn403WhenUserHasWrongRole() throws Exception {
+
+        Long versionId = 1L;
+
+        mockMvc.perform(get("/recipes/{id}/versions/{versionId}", existingId, versionId)
+        .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
         Mockito.verifyNoInteractions(recipeService);

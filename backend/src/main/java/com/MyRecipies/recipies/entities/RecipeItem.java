@@ -108,8 +108,17 @@ public class RecipeItem {
         return unitCostSnapshot;
     }
 
+    public void setUnitCost(BigDecimal unitCostSnapshot) {
+        this.unitCostSnapshot = unitCostSnapshot;
+    }
+
     public BigDecimal getTotalCost() {
         return totalCostSnapshot;
     }
 
+    public void setTotalCost(BigDecimal totalCostSnapshot) {
+        this.totalCostSnapshot = totalCostSnapshot;
+    }
+
+    
 }
