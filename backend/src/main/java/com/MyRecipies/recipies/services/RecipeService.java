@@ -167,6 +167,44 @@ public class RecipeService {
         return dto;
     }
 
+    @Transactional
+    public RecipeDTO restoreVersion(Long recipeId, Long versionId) {
+
+        RecipeVersion version = versionRepository.findByIdAndRecipeId(versionId, recipeId).orElseThrow(() -> new ResourceNotFoundException("Versão não encontrada"));
+
+        authService.validateSelfOrAdmin(version.getRecipe().getClient().getId());
+
+        Recipe recipe = version.getRecipe();
+        createVersion(recipe);
+
+        recipe.setDescription(version.getDescription());
+        recipe.setAmount(version.getAmount());
+
+        Product product = recipe.getProduct();
+        product.setName(version.getProductNameSnapshot());
+        product.setPrice(version.getProductPriceSnapshot());
+        
+        recipe.getItems().clear();
+
+        for (RecipeItemVersion itemVersion : version.getItems()) {
+
+            RecipeItem item = new RecipeItem();
+            item.setRecipe(recipe);
+            item.setQuantity(itemVersion.getQuantity());
+
+            item.setUnitCost(itemVersion.getUnitCostSnapshot());
+            item.setTotalCost(itemVersion.getTotalCostSnapshot());
+            recipe.getItems().add(item);
+        }
+
+        recipe = recipeRepository.save(recipe);
+
+        RecipeDTO dto = new RecipeDTO(recipe);
+        calculateFinancialData(recipe, dto);
+
+        return dto;
+    }
+
     private void calculateFinancialData(Recipe entity, RecipeDTO dto) {
 
         BigDecimal totalCost = entity.getItems().stream()

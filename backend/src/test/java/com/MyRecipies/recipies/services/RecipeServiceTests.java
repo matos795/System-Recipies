@@ -495,5 +495,4 @@ public class RecipeServiceTests {
                         .getTotalCostSnapshot()
                         .compareTo(new BigDecimal("10")) == 0));
     }
-
 }

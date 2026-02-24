@@ -53,33 +53,33 @@ public class RecipeIntegrationTest {
     @Test
     public void insertShouldPersistRecipe() {
 
-    User user = new User();
-    user.setEmail("test@test.com");
-    user.setPassword("123456");
-    user = userRepository.save(user);
+        User user = new User();
+        user.setEmail("test@test.com");
+        user.setPassword("123456");
+        user = userRepository.save(user);
 
-    Mockito.when(userService.authenticated()).thenReturn(user);
+        Mockito.when(userService.authenticated()).thenReturn(user);
 
-    RecipeDTO dto = new RecipeDTO();
-    dto.setProductName("Bolo");
-    dto.setProductPrice(BigDecimal.valueOf(10.0));
-    dto.setItems(new ArrayList<>());
+        RecipeDTO dto = new RecipeDTO();
+        dto.setProductName("Bolo");
+        dto.setProductPrice(BigDecimal.valueOf(10.0));
+        dto.setItems(new ArrayList<>());
 
-    RecipeDTO result = recipeService.insert(dto);
+        RecipeDTO result = recipeService.insert(dto);
 
-    Assertions.assertNotNull(result.getId());
-    Assertions.assertEquals("Bolo", result.getProductName());
-    Assertions.assertEquals(BigDecimal.valueOf(10.0), result.getProductPrice());
+        Assertions.assertNotNull(result.getId());
+        Assertions.assertEquals("Bolo", result.getProductName());
+        Assertions.assertEquals(BigDecimal.valueOf(10.0), result.getProductPrice());
 
-    Recipe recipe = recipeRepository.findById(result.getId()).orElseThrow();
+        Recipe recipe = recipeRepository.findById(result.getId()).orElseThrow();
 
-    Assertions.assertEquals("Bolo", recipe.getProduct().getName());
-    Assertions.assertEquals(BigDecimal.valueOf(10.0), recipe.getProduct().getPrice());
-    Assertions.assertEquals(user.getId(), recipe.getClient().getId());
+        Assertions.assertEquals("Bolo", recipe.getProduct().getName());
+        Assertions.assertEquals(BigDecimal.valueOf(10.0), recipe.getProduct().getPrice());
+        Assertions.assertEquals(user.getId(), recipe.getClient().getId());
 
-}
+    }
 
-@Test
+    @Test
     public void shouldInsertUpdateAndCreateVersionCorrectly() {
 
         // ========================
@@ -159,5 +159,38 @@ public class RecipeIntegrationTest {
                         .compareTo(new BigDecimal("10")));
     }
 
-}
+    @Test
+    public void shouldRestorePreviousVersionCorrectly() {
 
+        User user = new User();
+        user.setName("Teste");
+        user.setEmail("teste@email.com");
+        user.setPassword("123");
+        user = userRepository.save(user);
+
+        Mockito.when(userService.authenticated()).thenReturn(user);
+
+        RecipeDTO dto = new RecipeDTO();
+        dto.setDescription("Original");
+        dto.setAmount(1);
+        dto.setProductName("Bolo");
+        dto.setProductPrice(new BigDecimal("50"));
+
+        RecipeDTO inserted = recipeService.insert(dto);
+
+        dto.setDescription("Modificado");
+        dto.setProductPrice(new BigDecimal("100"));
+
+        recipeService.update(inserted.getId(), dto);
+
+        List<RecipeVersionDTO> versions = recipeService.findVersions(inserted.getId());
+
+        Long versionToRestore = versions.get(1).getId(); // versão antiga
+
+        RecipeDTO restored = recipeService.restoreVersion(inserted.getId(), versionToRestore);
+
+        assertEquals("Original", restored.getDescription());
+        assertEquals(0,
+                restored.getProductPrice().compareTo(new BigDecimal("50")));
+    }
+}

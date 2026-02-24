@@ -87,4 +87,12 @@ public class RecipeController {
         RecipeVersionDTO dto = service.findVersionById(id, versionId);
         return ResponseEntity.ok(dto);
     }
+
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CLIENT')")
+    @GetMapping(value = "/{id}/versions/{versionId}/restore")
+    public ResponseEntity<RecipeDTO> restoreVersion(@PathVariable Long id, @PathVariable Long versionId) {
+        
+        RecipeDTO dto = service.restoreVersion(id, versionId);
+        return ResponseEntity.ok(dto);
+    }
 }
