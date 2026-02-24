@@ -7,6 +7,7 @@ import java.util.List;
 
 import com.MyRecipies.recipies.entities.RecipeItemVersion;
 import com.MyRecipies.recipies.entities.RecipeVersion;
+import com.MyRecipies.recipies.entities.enums.VersionActionType;
 
 public class RecipeVersionDTO {
 
@@ -20,6 +21,7 @@ public class RecipeVersionDTO {
     private BigDecimal totalCost;
     private BigDecimal profit;
     private BigDecimal margin;
+    private VersionActionType actionType;
 
     private List<RecipeItemVersionDTO> items = new ArrayList<>();
 
@@ -34,6 +36,7 @@ public class RecipeVersionDTO {
         amount = entity.getAmount();
         productNameSnapshot = entity.getProductNameSnapshot();
         productPriceSnapshot = entity.getProductPriceSnapshot();
+        actionType = entity.getActionType();
 
         if (entity.getItems() != null) {
             for (RecipeItemVersion item : entity.getItems()) {
@@ -128,5 +131,13 @@ public class RecipeVersionDTO {
 
     public void setMargin(BigDecimal margin) {
         this.margin = margin;
+    }
+
+    public VersionActionType getActionType() {
+        return actionType;
+    }
+
+    public void setActionType(VersionActionType actionType) {
+        this.actionType = actionType;
     }
 }

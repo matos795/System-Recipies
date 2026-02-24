@@ -5,8 +5,13 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.MyRecipies.recipies.entities.enums.VersionActionType;
+
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -29,6 +34,10 @@ public class RecipeVersion {
 
     private String productNameSnapshot;
     private BigDecimal productPriceSnapshot;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private VersionActionType actionType;
 
     @ManyToOne
     @JoinColumn(name = "recipe_product_id", nullable = false)
@@ -112,5 +121,12 @@ public class RecipeVersion {
         this.items = items;
     }
 
-}
+    public VersionActionType getActionType() {
+        return actionType;
+    }
 
+    public void setActionType(VersionActionType actionType) {
+        this.actionType = actionType;
+    }
+
+}

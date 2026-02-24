@@ -423,4 +423,91 @@ public class RecipeControllerTests {
 
         Mockito.verifyNoInteractions(recipeService);
     }
+
+    @Test
+    @WithMockUser(roles = "CLIENT")
+    public void restoreVersionShouldReturnRestoredVersionWhenVersionExists() throws Exception {
+
+        Long versionId = 1L;
+
+        mockMvc.perform(get("/recipes/{id}/versions/{versionId}/restore", existingId, versionId)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+
+        Mockito.verify(recipeService).restoreVersion(existingId, versionId);
+    }
+
+    @Test
+    @WithMockUser(roles = "CLIENT")
+    public void restoreVersionShouldReturn404WhenVersionDoesNotExist() throws Exception {
+
+        Long versionId = 1000L;
+
+        Mockito.when(recipeService.restoreVersion(existingId, versionId)).thenThrow(ResourceNotFoundException.class);
+
+        mockMvc.perform(get("/recipes/{id}/versions/{versionId}/restore", existingId, versionId)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound());
+
+        Mockito.verify(recipeService).restoreVersion(existingId, versionId);
+    }
+
+    @Test
+    public void restoreVersionShouldReturn401WhenNotAuthenticated() throws Exception {
+
+        Long versionId = 1L;
+
+        mockMvc.perform(get("/recipes/{id}/versions/{versionId}/restore", existingId, versionId)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isUnauthorized());
+
+        Mockito.verifyNoInteractions(recipeService);
+    }
+
+    @Test
+    @WithMockUser(roles = "OTHER")
+    public void restoreVersionShouldReturn403WhenUserHasWrongRole() throws Exception {
+
+        Long versionId = 1L;
+
+        mockMvc.perform(get("/recipes/{id}/versions/{versionId}/restore", existingId, versionId)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isForbidden());
+
+        Mockito.verifyNoInteractions(recipeService);
+    }
+
+    @Test
+    @WithMockUser(roles = "CLIENT")
+    public void refreshRecipePricesShouldReturnUpdatedRecipe() throws Exception {
+
+        mockMvc.perform(put("/recipes/{id}/refresh-prices", existingId)
+        .with(csrf())
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+
+        Mockito.verify(recipeService).refreshRecipePrices(existingId);
+    }
+
+    @Test
+    public void refreshRecipePricesShouldReturn401WhenNotAuthenticated() throws Exception {
+
+        mockMvc.perform(put("/recipes/{id}/refresh-prices", existingId)
+        .with(csrf())
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isUnauthorized());
+
+        Mockito.verifyNoInteractions(recipeService);
+    }
+
+    @Test
+    @WithMockUser(roles = "OTHER")
+    public void refreshRecipePricesShouldReturn403WhenUserHasWrongRole() throws Exception {
+
+        mockMvc.perform(put("/recipes/{id}/refresh-prices", existingId)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isForbidden());
+
+        Mockito.verifyNoInteractions(recipeService);
+    }
 }

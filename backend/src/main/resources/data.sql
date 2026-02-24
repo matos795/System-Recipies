@@ -40,9 +40,13 @@ INSERT INTO products (name, price, img_url, create_date, last_update_date) VALUE
 -- ==========================================================
 -- 📘 RECIPES (product_id == id do product)
 -- ==========================================================
-INSERT INTO recipes (product_id, last_update_date, description, amount, client_id) VALUES (1, CURRENT_TIMESTAMP, 'Receita de bolo de chocolate simples', 8, 1);
-INSERT INTO recipes (product_id, last_update_date, description, amount, client_id) VALUES (2, CURRENT_TIMESTAMP, 'Receita de torta de limão gelada', 6, 1);
+INSERT INTO recipes
+(product_id, last_update_date, description, amount, client_id, deleted)
+VALUES (1, CURRENT_TIMESTAMP, 'Receita de bolo de chocolate simples', 8, 1, false);
 
+INSERT INTO recipes
+(product_id, last_update_date, description, amount, client_id, deleted)
+VALUES (2, CURRENT_TIMESTAMP, 'Receita de torta de limão gelada', 6, 1, false);
 
 -- ==========================================================
 -- 🧂 INGREDIENTS

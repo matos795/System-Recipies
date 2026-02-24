@@ -16,6 +16,7 @@ import com.MyRecipies.recipies.entities.RecipeVersion;
 import com.MyRecipies.recipies.entities.Supplier;
 import com.MyRecipies.recipies.entities.User;
 import com.MyRecipies.recipies.entities.enums.UnitType;
+import com.MyRecipies.recipies.entities.enums.VersionActionType;
 
 public class Factory {
 
@@ -121,6 +122,7 @@ public class Factory {
         version.setAmount(1);
         version.setProductNameSnapshot("Produto");
         version.setProductPriceSnapshot(BigDecimal.TEN);
+        version.setActionType(VersionActionType.CREATE); // ou UPDATE
         return version;
     }
 

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
@@ -33,6 +34,9 @@ public class Recipe {
     private String description;
     private Integer amount;
 
+    @Column(nullable = false)
+    private Boolean deleted = false;
+
     @ManyToOne
     @JoinColumn(name = "client_id")
     private User client;
@@ -53,7 +57,7 @@ public class Recipe {
         this.amount = amount;
         this.client = client;
     }
-    
+
     public Long getId() {
         return id;
     }
@@ -101,10 +105,10 @@ public class Recipe {
     public void setItems(List<RecipeItem> items) {
         this.items = items;
         if (items != null) {
-        for (RecipeItem item : items) {
-            item.setRecipe(this);
+            for (RecipeItem item : items) {
+                item.setRecipe(this);
+            }
         }
-    }
     }
 
     public User getClient() {
@@ -116,50 +120,52 @@ public class Recipe {
     }
 
     public void addItem(RecipeItem item) {
-    items.add(item);
-    item.setRecipe(this);
-}
+        items.add(item);
+        item.setRecipe(this);
+    }
 
-public void removeItem(RecipeItem item) {
-    items.remove(item);
-    item.setRecipe(null);
-}
+    public void removeItem(RecipeItem item) {
+        items.remove(item);
+        item.setRecipe(null);
+    }
 
-@PrePersist
-protected void onCreate() {
-    this.lastUpdateDate = LocalDateTime.now(); 
-}
+    @PrePersist
+    protected void onCreate() {
+        this.lastUpdateDate = LocalDateTime.now();
+    }
 
-@PreUpdate
-protected void onUpdate() {
-    this.lastUpdateDate = LocalDateTime.now();
-}
+    @PreUpdate
+    protected void onUpdate() {
+        this.lastUpdateDate = LocalDateTime.now();
+    }
 
-public BigDecimal calculateTotalCost() {
-    return items.stream()
-            .map(RecipeItem::getTotalCost)
-            .reduce(BigDecimal.ZERO, BigDecimal::add);
-}
+    public BigDecimal calculateTotalCost() {
+        return items.stream()
+                .map(RecipeItem::getTotalCost)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
 
-public BigDecimal calculateUnitCost() {
-    if (amount == 0) return BigDecimal.ZERO;
-    return calculateTotalCost().divide(BigDecimal.valueOf(amount));
-}
+    public BigDecimal calculateUnitCost() {
+        if (amount == 0)
+            return BigDecimal.ZERO;
+        return calculateTotalCost().divide(BigDecimal.valueOf(amount));
+    }
 
-public BigDecimal calculateUnitProfit() {
-    return product.getPrice().subtract(calculateUnitCost());
-}
+    public BigDecimal calculateUnitProfit() {
+        return product.getPrice().subtract(calculateUnitCost());
+    }
 
-public BigDecimal calculateTotalProfit() {
-    return calculateUnitProfit().multiply(BigDecimal.valueOf(amount));
-}
+    public BigDecimal calculateTotalProfit() {
+        return calculateUnitProfit().multiply(BigDecimal.valueOf(amount));
+    }
 
-public BigDecimal calculateProfitPercentage() {
-    BigDecimal unitCost = calculateUnitCost();
-    if (unitCost.compareTo(BigDecimal.ZERO) == 0) return BigDecimal.ZERO;
+    public BigDecimal calculateProfitPercentage() {
+        BigDecimal unitCost = calculateUnitCost();
+        if (unitCost.compareTo(BigDecimal.ZERO) == 0)
+            return BigDecimal.ZERO;
 
-    return calculateUnitProfit().divide(unitCost).multiply(BigDecimal.valueOf(100));
-}
+        return calculateUnitProfit().divide(unitCost).multiply(BigDecimal.valueOf(100));
+    }
 
     public List<RecipeVersion> getVersions() {
         return versions;
@@ -167,6 +173,14 @@ public BigDecimal calculateProfitPercentage() {
 
     public void setVersions(List<RecipeVersion> versions) {
         this.versions = versions;
+    }
+
+    public Boolean getDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(Boolean deleted) {
+        this.deleted = deleted;
     }
 
 }

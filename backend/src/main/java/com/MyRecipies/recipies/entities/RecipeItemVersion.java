@@ -20,6 +20,9 @@ public class RecipeItemVersion {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private Long ingredientId;
+    private Long subProductId;
+
     private String ingredientName;
     private BigDecimal quantity;
     private BigDecimal unitCostSnapshot;
@@ -87,6 +90,22 @@ public class RecipeItemVersion {
 
     public void setVersion(RecipeVersion version) {
         this.version = version;
+    }
+
+    public Long getIngredientId() {
+        return ingredientId;
+    }
+
+    public void setIngredientId(Long ingredientId) {
+        this.ingredientId = ingredientId;
+    }
+
+    public Long getSubProductId() {
+        return subProductId;
+    }
+
+    public void setSubProductId(Long subProductId) {
+        this.subProductId = subProductId;
     }
 
 

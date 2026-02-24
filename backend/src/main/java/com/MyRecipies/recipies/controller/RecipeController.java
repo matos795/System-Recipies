@@ -91,8 +91,14 @@ public class RecipeController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CLIENT')")
     @GetMapping(value = "/{id}/versions/{versionId}/restore")
     public ResponseEntity<RecipeDTO> restoreVersion(@PathVariable Long id, @PathVariable Long versionId) {
-        
+
         RecipeDTO dto = service.restoreVersion(id, versionId);
+        return ResponseEntity.ok(dto);
+    }
+
+    @PutMapping("/{id}/refresh-prices")
+    public ResponseEntity<RecipeDTO> refreshRecipePrices(@PathVariable Long id) {
+        RecipeDTO dto = service.refreshRecipePrices(id);
         return ResponseEntity.ok(dto);
     }
 }

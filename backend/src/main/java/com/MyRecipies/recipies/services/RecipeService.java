@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -26,11 +25,11 @@ import com.MyRecipies.recipies.entities.RecipeItem;
 import com.MyRecipies.recipies.entities.RecipeItemVersion;
 import com.MyRecipies.recipies.entities.RecipeVersion;
 import com.MyRecipies.recipies.entities.enums.UnitType;
+import com.MyRecipies.recipies.entities.enums.VersionActionType;
 import com.MyRecipies.recipies.repositories.IngredientRepository;
 import com.MyRecipies.recipies.repositories.ProductRepository;
 import com.MyRecipies.recipies.repositories.RecipeRepository;
 import com.MyRecipies.recipies.repositories.RecipeVersionRepository;
-import com.MyRecipies.recipies.services.exceptions.DatabaseException;
 import com.MyRecipies.recipies.services.exceptions.ResourceNotFoundException;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -71,9 +70,15 @@ public class RecipeService {
 
     @Transactional(readOnly = true)
     public RecipeDTO findById(Long id) {
+
         Recipe recipe = recipeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Recurso não encontrado!"));
+
         authService.validateSelfOrAdmin(recipe.getClient().getId());
+
+        if (recipe.getDeleted()) {
+            throw new ResourceNotFoundException("Receita deletada");
+        }
 
         RecipeDTO dto = new RecipeDTO(recipe);
         calculateFinancialData(recipe, dto);
@@ -86,7 +91,7 @@ public class RecipeService {
         dtoToEntity(entity, dto);
         entity.setClient(userService.authenticated());
         entity = recipeRepository.save(entity);
-        createVersion(entity);
+        createVersion(entity, VersionActionType.CREATE);
 
         RecipeDTO newDTO = new RecipeDTO(entity);
         calculateFinancialData(entity, newDTO);
@@ -100,7 +105,7 @@ public class RecipeService {
             Recipe entity = recipeRepository.getReferenceById(id);
             authService.validateSelfOrAdmin(entity.getClient().getId());
 
-            createVersion(entity);
+            createVersion(entity, VersionActionType.UPDATE);
 
             dtoToEntity(entity, dto);
             entity = recipeRepository.save(entity);
@@ -117,24 +122,18 @@ public class RecipeService {
 
     @Transactional
     public void delete(Long id) {
-        // Busca a receita
+
         Recipe recipe = recipeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Recurso não encontrado"));
 
         authService.validateSelfOrAdmin(recipe.getClient().getId());
-        try {
 
-            recipe.getItems().clear();
-            Product product = recipe.getProduct();
-            recipeRepository.delete(recipe);
+        createVersion(recipe, VersionActionType.DELETE);
 
-            if (product != null) {
-                productRepository.delete(product);
-            }
+        recipe.setDeleted(true);
 
-        } catch (DataIntegrityViolationException e) {
-            throw new DatabaseException("Falha de integridade referencial");
-        }
+        recipeRepository.save(recipe);
+
     }
 
     @Transactional(readOnly = true)
@@ -151,7 +150,7 @@ public class RecipeService {
             RecipeVersionDTO dto = new RecipeVersionDTO(version);
             calculateVersionFinancialData(version, dto);
             return dto;
-            }).collect(Collectors.toList());
+        }).collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
@@ -170,12 +169,13 @@ public class RecipeService {
     @Transactional
     public RecipeDTO restoreVersion(Long recipeId, Long versionId) {
 
-        RecipeVersion version = versionRepository.findByIdAndRecipeId(versionId, recipeId).orElseThrow(() -> new ResourceNotFoundException("Versão não encontrada"));
+        RecipeVersion version = versionRepository.findByIdAndRecipeId(versionId, recipeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Versão não encontrada"));
 
         authService.validateSelfOrAdmin(version.getRecipe().getClient().getId());
 
         Recipe recipe = version.getRecipe();
-        createVersion(recipe);
+        createVersion(recipe, VersionActionType.RESTORE);
 
         recipe.setDescription(version.getDescription());
         recipe.setAmount(version.getAmount());
@@ -183,7 +183,7 @@ public class RecipeService {
         Product product = recipe.getProduct();
         product.setName(version.getProductNameSnapshot());
         product.setPrice(version.getProductPriceSnapshot());
-        
+
         recipe.getItems().clear();
 
         for (RecipeItemVersion itemVersion : version.getItems()) {
@@ -194,10 +194,58 @@ public class RecipeService {
 
             item.setUnitCost(itemVersion.getUnitCostSnapshot());
             item.setTotalCost(itemVersion.getTotalCostSnapshot());
+
+            item.setIngredient(itemVersion.getIngredientId() != null
+                    ? ingredientRepository.getReferenceById(itemVersion.getIngredientId())
+                    : null);
+            item.setSubProduct(itemVersion.getSubProductId() != null
+                    ? productRepository.getReferenceById(itemVersion.getSubProductId())
+                    : null);
+
             recipe.getItems().add(item);
         }
 
         recipe = recipeRepository.save(recipe);
+
+        RecipeDTO dto = new RecipeDTO(recipe);
+        calculateFinancialData(recipe, dto);
+
+        return dto;
+    }
+
+    @Transactional
+    public RecipeDTO refreshRecipePrices(Long recipeId) {
+
+        Recipe recipe = recipeRepository.findById(recipeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Receita não encontrada!"));
+
+        authService.validateSelfOrAdmin(recipe.getClient().getId());
+
+        createVersion(recipe, VersionActionType.REFRESH);
+
+        for (RecipeItem item : recipe.getItems()) {
+
+            if (item.getIngredient() != null) {
+
+                Ingredient ingredient = ingredientRepository.findById(item.getIngredient().getId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Ingrediente removido"));
+
+                authService.validateSelfOrAdmin(ingredient.getClient().getId());
+
+                item.setIngredient(ingredient);
+                item.calculateSnapshot();
+            } else if (item.getSubProduct() != null) {
+
+                Product sub = productRepository.findById(item.getSubProduct().getId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Produto removido"));
+                authService.validateSelfOrAdmin(sub.getRecipe().getClient().getId());
+
+                item.setSubProduct(sub);
+                item.calculateSnapshot();
+            }
+        }
+
+        recipeRepository.save(recipe);
 
         RecipeDTO dto = new RecipeDTO(recipe);
         calculateFinancialData(recipe, dto);
@@ -240,29 +288,29 @@ public class RecipeService {
 
     private void calculateVersionFinancialData(RecipeVersion version, RecipeVersionDTO dto) {
 
-    BigDecimal totalCost = version.getItems().stream()
-            .map(RecipeItemVersion::getTotalCostSnapshot)
-            .reduce(BigDecimal.ZERO, BigDecimal::add)
-            .setScale(2, RoundingMode.HALF_UP);
-
-    dto.setTotalCost(totalCost);
-
-    BigDecimal salePrice = version.getProductPriceSnapshot();
-
-    BigDecimal profit = salePrice.subtract(totalCost)
-            .setScale(2, RoundingMode.HALF_UP);
-
-    dto.setProfit(profit);
-
-    if (salePrice.compareTo(BigDecimal.ZERO) > 0) {
-        BigDecimal margin = profit
-                .divide(salePrice, 4, RoundingMode.HALF_UP)
-                .multiply(new BigDecimal(100))
+        BigDecimal totalCost = version.getItems().stream()
+                .map(RecipeItemVersion::getTotalCostSnapshot)
+                .reduce(BigDecimal.ZERO, BigDecimal::add)
                 .setScale(2, RoundingMode.HALF_UP);
 
-        dto.setMargin(margin);
+        dto.setTotalCost(totalCost);
+
+        BigDecimal salePrice = version.getProductPriceSnapshot();
+
+        BigDecimal profit = salePrice.subtract(totalCost)
+                .setScale(2, RoundingMode.HALF_UP);
+
+        dto.setProfit(profit);
+
+        if (salePrice.compareTo(BigDecimal.ZERO) > 0) {
+            BigDecimal margin = profit
+                    .divide(salePrice, 4, RoundingMode.HALF_UP)
+                    .multiply(new BigDecimal(100))
+                    .setScale(2, RoundingMode.HALF_UP);
+
+            dto.setMargin(margin);
+        }
     }
-}
 
     // Método dtoToEntity completo
     private void dtoToEntity(Recipe entity, RecipeDTO dto) {
@@ -318,7 +366,7 @@ public class RecipeService {
         }
     }
 
-    private void createVersion(Recipe recipe) {
+    private void createVersion(Recipe recipe, VersionActionType actionType) {
 
         RecipeVersion version = new RecipeVersion();
         version.setRecipe(recipe);
@@ -327,6 +375,7 @@ public class RecipeService {
         version.setAmount(recipe.getAmount());
         version.setProductNameSnapshot(recipe.getProduct().getName());
         version.setProductPriceSnapshot(recipe.getProduct().getPrice());
+        version.setActionType(actionType);
 
         // Número da versão
         int nextVersion = recipe.getVersions() == null ? 1 : recipe.getVersions().size() + 1;
@@ -347,6 +396,12 @@ public class RecipeService {
                             : UnitType.UNIT);
             itemVersion.setUnitCostSnapshot(item.getUnitCost());
             itemVersion.setTotalCostSnapshot(item.getTotalCost());
+
+            if (item.getIngredient() != null) {
+                itemVersion.setIngredientId(item.getIngredient().getId());
+            } else if (item.getSubProduct() != null) {
+                itemVersion.setSubProductId(item.getSubProduct().getId());
+            }
 
             version.getItems().add(itemVersion);
         }

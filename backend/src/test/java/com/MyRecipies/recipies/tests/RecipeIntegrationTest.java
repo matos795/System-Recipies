@@ -193,4 +193,62 @@ public class RecipeIntegrationTest {
         assertEquals(0,
                 restored.getProductPrice().compareTo(new BigDecimal("50")));
     }
+
+    @Test
+    public void refreshPricesShouldRecalculateUsingUpdatedIngredientPrice() {
+
+        User user = new User();
+        user.setName("Teste");
+        user.setEmail("teste@email.com");
+        user.setPassword("123");
+        user = userRepository.save(user);
+
+        Mockito.when(userService.authenticated()).thenReturn(user);
+
+        // ========================
+        // 1️⃣ Criar ingrediente real
+        // ========================
+        Ingredient ingredient = new Ingredient();
+        ingredient.setName("Farinha");
+        ingredient.setPriceCost(new BigDecimal("10"));
+        ingredient.setQuantityPerUnit(new BigDecimal("1"));
+        ingredient.setUnit(UnitType.KILOGRAM);
+        ingredient.setClient(user);
+
+        ingredient = ingredientRepository.save(ingredient);
+
+        // ========================
+        // 2️⃣ Criar DTO para insert
+        // ========================
+        RecipeDTO dto = new RecipeDTO();
+        dto.setDescription("Receita Original");
+        dto.setAmount(1);
+        dto.setProductName("Bolo");
+        dto.setProductPrice(new BigDecimal("50"));
+
+        RecipeItemDTO itemDTO = new RecipeItemDTO();
+        itemDTO.setIngredientId(ingredient.getId());
+        itemDTO.setQuantity(new BigDecimal("1"));
+
+        dto.setItems(List.of(itemDTO));
+
+        // ========================
+        // 3️⃣ Insert
+        // ========================
+        RecipeDTO inserted = recipeService.insert(dto);
+
+        
+        assertEquals(0, inserted.getTotalCost().compareTo(new BigDecimal("10")));
+        assertEquals(0, inserted.getProfit().compareTo(new BigDecimal("40")));
+
+        // ========================
+        // 4️⃣ Atualizar preço do ingrediente
+        ingredient.setPriceCost(new BigDecimal("15"));
+        ingredientRepository.save(ingredient);
+
+        RecipeDTO refreshed = recipeService.refreshRecipePrices(inserted.getId());
+
+        assertEquals(0, refreshed.getTotalCost().compareTo(new BigDecimal("15")));
+        assertEquals(0, refreshed.getProfit().compareTo(new BigDecimal("35")));
+    }
 }
